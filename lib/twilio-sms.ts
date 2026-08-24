@@ -52,7 +52,7 @@ export function generateDonationReceiptSms(
   amount: number,
   receiptNumber: string
 ): string {
-  return `Dear ${donorName}, Thank you for your donation of INR ${amount}. Your 80G receipt number is ${receiptNumber}. Visit nisvarthjan.org to verify. - Nisvarthjan Seva Foundation`;
+  return `Dear ${donorName}, Thank you for your donation of INR ${amount}. Your 80G receipt number is ${receiptNumber}. Visit nisvarthjan.org to verify. - PLF - Passion for the Least Foundation`;
 }
 
 export function generateMembershipReceiptSms(
@@ -60,5 +60,5 @@ export function generateMembershipReceiptSms(
   membershipId: string,
   receiptNumber: string
 ): string {
-  return `Dear ${memberName}, Your membership (ID: ${membershipId}) has been confirmed. Receipt: ${receiptNumber}. Thank you for supporting Nisvarthjan! - Nisvarthjan Seva Foundation`;
+  return `Dear ${memberName}, Your membership (ID: ${membershipId}) has been confirmed. Receipt: ${receiptNumber}. Thank you for supporting PLF! - PLF - Passion for the Least Foundation`;
 }

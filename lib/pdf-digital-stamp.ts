@@ -4,7 +4,7 @@ export function drawDigitalStamp(
   doc: jsPDF,
   x: number,
   y: number,
-  color: [number, number, number] = [190, 0, 39],
+  color: [number, number, number] = [11, 74, 127],
 ) {
   const width = 36;
   const height = 20;
@@ -21,8 +21,9 @@ export function drawDigitalStamp(
   doc.setTextColor(...color);
 
   doc.setFontSize(4.8);
-  doc.text("NISVARTHJAN SEVA", x, top + 5.2, { align: "center" });
-  doc.text("FOUNDATION", x, top + 8.4, { align: "center" });
+  doc.setFontSize(4.2);
+  doc.text("PLF", x, top + 4.6, { align: "center" });
+  doc.text("PASSION FOR THE LEAST FOUNDATION", x, top + 8, { align: "center", maxWidth: 31 });
 
   doc.setLineWidth(0.15);
   doc.line(left + 4, top + 10.5, left + width - 4, top + 10.5);

@@ -3,6 +3,9 @@ import path from "path";
 import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
 
+const ORGANIZATION_NAME = "PLF - Passion for the Least Foundation";
+const BRAND_PRIMARY: [number, number, number] = [11, 74, 127];
+
 export interface MemberDocumentRecord {
   id: number;
   name?: string;
@@ -74,12 +77,12 @@ async function responseToDataUrl(response: Response) {
 }
 
 function drawPhotoPlaceholder(doc: jsPDF, x: number, y: number, size: number) {
-  doc.setDrawColor(190, 0, 39);
+  doc.setDrawColor(...BRAND_PRIMARY);
   doc.setLineWidth(0.35);
   doc.roundedRect(x, y, size, size, 2, 2);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(5);
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(...BRAND_PRIMARY);
   doc.text("PASTE", x + size / 2, y + size / 2 - 1, { align: "center" });
   doc.text("PHOTO", x + size / 2, y + size / 2 + 1.5, { align: "center" });
 }
@@ -124,7 +127,7 @@ function addValueText(doc: jsPDF, text: string, x: number, y: number, maxWidth: 
   doc.text(lines, x, y);
 }
 
-function drawDigitalStamp(doc: jsPDF, x: number, y: number, color: [number, number, number] = [190, 0, 39]) {
+function drawDigitalStamp(doc: jsPDF, x: number, y: number, color: [number, number, number] = BRAND_PRIMARY) {
   doc.setDrawColor(...color);
   doc.setLineWidth(0.7);
   doc.circle(x, y, 16, "S");
@@ -133,8 +136,9 @@ function drawDigitalStamp(doc: jsPDF, x: number, y: number, color: [number, numb
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...color);
   doc.setFontSize(5.3);
-  doc.text("NISVARTHJAN", x, y - 6.5, { align: "center" });
-  doc.text("SEVA FOUNDATION", x, y - 2, { align: "center" });
+  doc.text("PLF", x, y - 6.5, { align: "center" });
+  doc.setFontSize(4.2);
+  doc.text("PASSION FOR THE LEAST FOUNDATION", x, y - 2, { align: "center", maxWidth: 26 });
   doc.setFontSize(6.4);
   doc.text("DIGITALLY", x, y + 4.5, { align: "center" });
   doc.text("SIGNED", x, y + 9.5, { align: "center" });
@@ -177,7 +181,7 @@ export async function generateMembershipCertificatePdf(member: MemberDocumentRec
   doc.setFillColor(255, 252, 248);
   doc.rect(0, 0, 297, 210, "F");
 
-  doc.setDrawColor(190, 0, 39);
+  doc.setDrawColor(...BRAND_PRIMARY);
   doc.setLineWidth(1.2);
   doc.rect(12, 12, 273, 186);
   doc.setLineWidth(0.35);
@@ -191,13 +195,13 @@ export async function generateMembershipCertificatePdf(member: MemberDocumentRec
   doc.addImage(qrDataUrl, "PNG", 244, 22, 24, 24);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(...BRAND_PRIMARY);
   doc.text("SCAN TO VERIFY", 256, 51, { align: "center" });
 
   doc.setFont("helvetica", "normal");
-  addCenteredText(doc, "MEMBERSHIP CERTIFICATE", 58, 18, [190, 0, 39]);
+  addCenteredText(doc, "MEMBERSHIP CERTIFICATE", 58, 18, BRAND_PRIMARY);
 
-  doc.setDrawColor(190, 0, 39);
+  doc.setDrawColor(...BRAND_PRIMARY);
   doc.line(92, 66, 205, 66);
 
   doc.setFont("helvetica", "normal");
@@ -209,7 +213,7 @@ export async function generateMembershipCertificatePdf(member: MemberDocumentRec
   doc.setFont("helvetica", "normal");
   addCenteredText(
     doc,
-    `as a ${membershipType} member of Nisvarthjan Seva Foundation.`,
+    `as a ${membershipType} member of ${ORGANIZATION_NAME}.`,
     108,
     13,
     [89, 78, 73],
@@ -217,7 +221,7 @@ export async function generateMembershipCertificatePdf(member: MemberDocumentRec
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(...BRAND_PRIMARY);
   doc.text("Certificate No.", 34, 124);
   doc.text("Membership ID", 34, 135);
   doc.text("Issued On", 34, 146);
@@ -227,7 +231,7 @@ export async function generateMembershipCertificatePdf(member: MemberDocumentRec
   addValueText(doc, safeText(member.membershipId), 78, 135, 72);
   doc.text(issuedAt, 78, 146);
 
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(...BRAND_PRIMARY);
   doc.text("Email", 178, 124);
   doc.text("Phone", 178, 135);
   doc.text("Location", 178, 146);
@@ -302,7 +306,7 @@ export async function generateMembershipReceiptPdf(member: MemberDocumentRecord,
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(89, 78, 73);
-  doc.text("Thank you for becoming a member of Nisvarthjan Seva Foundation.", 105, 232, { align: "center" });
+  doc.text(`Thank you for becoming a member of ${ORGANIZATION_NAME}.`, 105, 232, { align: "center", maxWidth: 160 });
 
   drawDigitalStamp(doc, 150, 252);
 
@@ -355,7 +359,7 @@ export async function generateMembershipIdCardPdf(member: MemberDocumentRecord, 
   doc.addImage(logoDataUrl, "PNG", 4.2, 3.1, headerLogoWidth, headerLogoHeight);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255, 255, 255);
-  fitText(doc, "NISVARTHJAN SEVA FOUNDATION", 19, 6.5, 60, 7, 4.5);
+  fitText(doc, ORGANIZATION_NAME.toUpperCase(), 19, 6.5, 60, 7, 4.5);
   doc.setFont("helvetica", "normal");
   fitText(doc, "Membership Identity Card", 19, 9.3, 60, 4.7, 3.8);
 
@@ -451,7 +455,7 @@ export async function generateMembershipIdCardPdf(member: MemberDocumentRecord, 
   doc.setFont("helvetica", "bold");
   doc.setTextColor(24, 24, 27);
   doc.setFontSize(6);
-  doc.text("Nisvarthjan Seva Foundation", 34, 17);
+  doc.text(ORGANIZATION_NAME, 34, 17);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(4.7);
   doc.setTextColor(63, 63, 70);

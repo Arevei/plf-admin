@@ -363,9 +363,9 @@ export function DashboardPanel({
     recipientEmail: "",
     recipientPhone: "",
     title: "Certificate of Appreciation",
-    description: "For valuable presence, support, and contribution to Nisvarthjan Seva Foundation activities.",
+    description: "For valuable presence, support, and contribution to PLF - Passion for the Least Foundation activities.",
     eventName: "",
-    issuedBy: "Nisvarthjan Seva Foundation",
+    issuedBy: "PLF - Passion for the Least Foundation",
     templateId: "classic" as VisitorCertificateItem["templateId"],
   });
 
@@ -1130,9 +1130,9 @@ export function DashboardPanel({
       recipientEmail: "",
       recipientPhone: "",
       title: "Certificate of Appreciation",
-      description: "For valuable presence, support, and contribution to Nisvarthjan Seva Foundation activities.",
+      description: "For valuable presence, support, and contribution to PLF - Passion for the Least Foundation activities.",
       eventName: "",
-      issuedBy: "Nisvarthjan Seva Foundation",
+      issuedBy: "PLF - Passion for the Least Foundation",
       templateId: "classic",
     });
   };
@@ -1223,14 +1223,14 @@ export function DashboardPanel({
           <div className="mb-3 flex justify-center rounded-xl bg-white px-3 py-2.5">
             <Image
               src="/brand/logo-navbar.png"
-              alt="Nisvarthjan Seva Foundation"
+              alt="PLF - Passion for the Least Foundation"
               width={220}
               height={56}
               className=""
             />
           </div>
           <p className="text-xs font-semibold uppercase tracking-widest text-rose-100">Admin Panel</p>
-          <h1 className="mt-2 text-xl font-bold">Nisvarthjan</h1>
+              <h1 className="mt-2 text-xl font-bold">PLF</h1>
           <p className="mt-1 truncate text-xs text-rose-100">{email}</p>
         </div>
 

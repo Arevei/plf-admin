@@ -89,7 +89,7 @@ function baseReceiptPdf(title: string, rows: Array<[string, string]>) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(89, 78, 73);
-  doc.text("Thank you for supporting Nisvarthjan Seva Foundation.", 105, 232, { align: "center" });
+  doc.text("Thank you for supporting PLF - Passion for the Least Foundation.", 105, 232, { align: "center", maxWidth: 160 });
 
   doc.setDrawColor(35, 35, 35);
   doc.line(126, 252, 174, 252);

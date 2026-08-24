@@ -87,7 +87,7 @@ export function LoginPanel() {
     <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-7 shadow-xl">
       <div className="mb-5">
         <p className="inline-block rounded-full bg-rose-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-rose-700">
-          Nisvarthjan Admin
+          PLF Admin
         </p>
         <h1 className="mt-3 text-2xl font-bold text-zinc-900">
           {needsBootstrap ? "Set First Admin" : "Admin Login"}

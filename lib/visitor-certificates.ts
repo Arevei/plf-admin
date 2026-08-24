@@ -12,7 +12,7 @@ export const visitorCertificateTemplates: Array<{
   accent: [number, number, number];
   background: [number, number, number];
 }> = [
-  { id: "classic", name: "Classic Red", primary: [190, 0, 39], accent: [35, 35, 35], background: [255, 252, 248] },
+  { id: "classic", name: "PLF Blue", primary: [11, 74, 127], accent: [35, 35, 35], background: [245, 250, 253] },
   { id: "heritage", name: "Heritage Gold", primary: [146, 97, 16], accent: [84, 55, 20], background: [255, 250, 235] },
   { id: "service", name: "Service Green", primary: [22, 101, 52], accent: [20, 83, 45], background: [247, 253, 247] },
   { id: "impact", name: "Impact Blue", primary: [29, 78, 216], accent: [30, 64, 175], background: [248, 251, 255] },
@@ -153,7 +153,7 @@ export async function generateVisitorCertificatePdf(certificate: VisitorCertific
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(75, 75, 75);
-  doc.text(certificate.issuedBy || "Nisvarthjan Seva Foundation", 148.5, 168, { align: "center", maxWidth: 90 });
+  doc.text(certificate.issuedBy || "PLF - Passion for the Least Foundation", 148.5, 168, { align: "center", maxWidth: 90 });
 
   drawDigitalStamp(doc, 148.5, 184, template.primary);
 

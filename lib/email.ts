@@ -22,6 +22,11 @@ import {
 } from "@/lib/membership-documents";
 
 const ADMIN_EMAIL = "nisvarthjansevango@gmail.com";
+const ORGANIZATION_NAME = "PLF - Passion for the Least Foundation";
+const CONTACT_NAME = "R Govind Raji";
+const CONTACT_ADDRESS = "104A, Exotica Eastern Court, Ghaziabad, IN";
+const CONTACT_PHONE = "+91 9999974145";
+const BRAND_PRIMARY = "#0B4A7F";
 
 // Branded email template wrapper
 function wrapEmailTemplate(content: string, title?: string, logoUrl?: string): string {
@@ -30,7 +35,7 @@ function wrapEmailTemplate(content: string, title?: string, logoUrl?: string): s
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${title || "Nisvarthjan Seva Foundation"}</title>
+  <title>${title || ORGANIZATION_NAME}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: Arial, Helvetica, sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 24px 8px;">
@@ -40,10 +45,10 @@ function wrapEmailTemplate(content: string, title?: string, logoUrl?: string): s
 
           <!-- Header -->
           <tr>
-            <td style="background-color: #fafafa; border-radius: 12px 12px 0 0; padding: 20px 28px; text-align: center; border-bottom: 3px solid #b0112f;">
-              ${logoUrl ? `<img src="${logoUrl}" alt="Nisvarthjan Seva Foundation" style="height: 60px; margin-bottom: 8px;" />` : ""}
-              <h1 style="margin: 0; font-size: 20px; font-weight: 700; color: #b0112f; letter-spacing: 0.5px;">
-                Nisvarthjan Seva Foundation
+            <td style="background-color: #fafafa; border-radius: 12px 12px 0 0; padding: 20px 28px; text-align: center; border-bottom: 3px solid ${BRAND_PRIMARY};">
+              ${logoUrl ? `<img src="${logoUrl}" alt="${ORGANIZATION_NAME}" style="height: 60px; margin-bottom: 8px;" />` : ""}
+              <h1 style="margin: 0; font-size: 20px; font-weight: 700; color: ${BRAND_PRIMARY}; letter-spacing: 0.5px;">
+                ${ORGANIZATION_NAME}
               </h1>
               <p style="margin: 4px 0 0; font-size: 12px; color: #71717a;">
                 Empowering Communities Through Service
@@ -60,20 +65,21 @@ function wrapEmailTemplate(content: string, title?: string, logoUrl?: string): s
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #fafafa; border-radius: 0 0 12px 12px; padding: 20px 28px; text-align: center; border-top: 3px solid #b0112f;">
+            <td style="background-color: #fafafa; border-radius: 0 0 12px 12px; padding: 20px 28px; text-align: center; border-top: 3px solid ${BRAND_PRIMARY};">
               <div style="padding: 12px 0; margin-bottom: 8px;">
-                <p style="margin: 0 0 6px; font-size: 14px; font-weight: 700; color: #b0112f;">
-                  Nisvarthjan Seva Foundation
+                <p style="margin: 0 0 6px; font-size: 14px; font-weight: 700; color: ${BRAND_PRIMARY};">
+                  ${ORGANIZATION_NAME}
                 </p>
+                <p style="margin: 0 0 4px; font-size: 12px; color: #71717a;">${CONTACT_NAME} | ${CONTACT_ADDRESS}</p>
                 <p style="margin: 0 0 4px; font-size: 12px; color: #71717a;">
-                  <span style="color: #b0112f;">📧</span> <a href="mailto:${ADMIN_EMAIL}" style="color: #b0112f; text-decoration: none;">${ADMIN_EMAIL}</a>
+                  <span style="color: ${BRAND_PRIMARY};">📧</span> <a href="mailto:${ADMIN_EMAIL}" style="color: ${BRAND_PRIMARY}; text-decoration: none;">${ADMIN_EMAIL}</a>
                 </p>
                 <p style="margin: 0; font-size: 12px; color: #71717a;">
-                  <span style="color: #b0112f;">📞</span> +91 73806 26179
+                  <span style="color: ${BRAND_PRIMARY};">📞</span> ${CONTACT_PHONE}
                 </p>
               </div>
               <p style="margin: 0; font-size: 11px; color: #a1a1aa;">
-                © ${new Date().getFullYear()} Nisvarthjan Seva Foundation. All rights reserved.
+                © ${new Date().getFullYear()} ${ORGANIZATION_NAME}. All rights reserved.
               </p>
             </td>
           </tr>
@@ -124,12 +130,12 @@ export async function sendMembershipApprovalPaymentEmail(member: MemberDoc, requ
   }
 
   const fee = membershipFees[member.membershipType];
-  const upiPayload = `upi://pay?pa=${upiId}&pn=${encodeURIComponent("Nisvarthjan Seva Foundation")}&am=${fee}&cu=INR&tn=${encodeURIComponent(`Membership ${member.membershipId}`)}`;
+  const upiPayload = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(ORGANIZATION_NAME)}&am=${fee}&cu=INR&tn=${encodeURIComponent(`Membership ${member.membershipId}`)}`;
   const qrDataUrl = await QRCode.toDataURL(upiPayload, { margin: 1, width: 240 });
 
   const transporter = getTransporter();
   const content = `
-      <h2 style="margin-bottom: 8px; color: #b0112f;">Membership Approval</h2>
+      <h2 style="margin-bottom: 8px; color: ${BRAND_PRIMARY};">Membership Approval</h2>
       <p style="margin-top: 0; color: #71717a;">Your membership request has been approved by admin.</p>
       <p>Dear ${member.name},</p>
       <p>Your application is approved. Please complete manual payment to activate membership.</p>
@@ -146,7 +152,7 @@ export async function sendMembershipApprovalPaymentEmail(member: MemberDoc, requ
     `;
 
   return transporter.sendMail({
-    from: `Nisvarthjan Seva Foundation <${fromAddress}>`,
+    from: `${ORGANIZATION_NAME} <${fromAddress}>`,
     to: member.email,
     replyTo: ADMIN_EMAIL,
     subject: "Membership approved - complete payment",
@@ -167,10 +173,10 @@ export async function sendVisitorCertificateEmail(certificate: VisitorCertificat
   await transporter.sendMail({
     from: fromAddress,
     to: certificate.recipientEmail,
-    subject: `${certificate.title} - Nisvarthjan Seva Foundation`,
+    subject: `${certificate.title} - ${ORGANIZATION_NAME}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #18181b;">
-        <h2 style="margin-bottom: 8px;">Nisvarthjan Seva Foundation</h2>
+        <h2 style="margin-bottom: 8px; color: ${BRAND_PRIMARY};">${ORGANIZATION_NAME}</h2>
         <p style="margin-top: 0; color: #52525b;">A certificate has been issued for you.</p>
         <p>Dear ${certificate.recipientName},</p>
         <p>Please find your certificate attached as a PDF.</p>
@@ -205,10 +211,10 @@ export async function sendDonationReceiptEmail(donation: DonationDoc, requestUrl
   await transporter.sendMail({
     from: fromAddress,
     to: donation.donorEmail,
-    subject: "80G donation receipt - Nisvarthjan Seva Foundation",
+    subject: `80G donation receipt - ${ORGANIZATION_NAME}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #18181b;">
-        <h2 style="margin-bottom: 8px;">Nisvarthjan Seva Foundation</h2>
+        <h2 style="margin-bottom: 8px; color: ${BRAND_PRIMARY};">${ORGANIZATION_NAME}</h2>
         <p style="margin-top: 0; color: #52525b;">Thank you for your donation.</p>
         <p>Dear ${donation.donorName},</p>
         <p>Your QR-coded 80G donation receipt PDF is attached with this email.</p>
@@ -256,7 +262,7 @@ export async function sendReferralAchievementEmail(member: ReferralAchievementMe
     subject: `${tier.label} referral achievement certificate`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #18181b;">
-        <h2 style="margin-bottom: 8px;">Nisvarthjan Seva Foundation</h2>
+        <h2 style="margin-bottom: 8px; color: ${BRAND_PRIMARY};">${ORGANIZATION_NAME}</h2>
         <p style="margin-top: 0; color: #52525b;">Congratulations on your referral achievement.</p>
         <p>Dear ${safeReferralText(member.name)},</p>
         <p>You have been awarded the <strong>${tier.label} Badge</strong> for collecting ${formatReferralAmount(achievement.donationAmount)} through donation referrals.</p>
@@ -285,10 +291,10 @@ export async function sendEnquiryReplyEmail(enquiry: { name: string; email: stri
   await transporter.sendMail({
     from: fromAddress,
     to: enquiry.email,
-    subject: "Reply to your enquiry - Nisvarthjan Seva Foundation",
+    subject: `Reply to your enquiry - ${ORGANIZATION_NAME}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #18181b;">
-        <h2 style="margin-bottom: 8px;">Nisvarthjan Seva Foundation</h2>
+        <h2 style="margin-bottom: 8px; color: ${BRAND_PRIMARY};">${ORGANIZATION_NAME}</h2>
         <p>Dear ${enquiry.name},</p>
         <p>${replyMessage.replace(/\n/g, "<br />")}</p>
         <div style="margin: 16px 0; padding: 12px; border: 1px solid #e4e4e7; border-radius: 8px; background: #fafafa;">
@@ -319,7 +325,7 @@ export async function sendMembershipIdCardCertificateEmail(member: MemberDoc, re
   const transporter = getTransporter();
 
   const content = `
-      <h2 style="margin-bottom: 8px; color: #b0112f;">Nisvarthjan Seva Foundation</h2>
+      <h2 style="margin-bottom: 8px; color: ${BRAND_PRIMARY};">${ORGANIZATION_NAME}</h2>
       <p style="margin-top: 0; color: #71717a;">Congratulations! Your membership has been approved.</p>
       <p>Dear ${member.name},</p>
       <p>We are pleased to inform you that your membership has been approved by the foundation. Your membership ID card and certificate are attached with this email.</p>
@@ -328,14 +334,14 @@ export async function sendMembershipIdCardCertificateEmail(member: MemberDoc, re
         <tr><td style="padding: 6px 10px; border: 1px solid #e4e4e7;">Certificate No.</td><td style="padding: 6px 10px; border: 1px solid #e4e4e7;">${member.certificateNumber || "Not available"}</td></tr>
       </table>
       <p style="color: #71717a;">Please keep these documents safe for your records.</p>
-      <p style="color: #71717a;">Welcome to the Nisvarthjan Seva Foundation family!</p>
+      <p style="color: #71717a;">Welcome to the ${ORGANIZATION_NAME} family!</p>
     `;
 
   return transporter.sendMail({
-    from: `Nisvarthjan Seva Foundation <${fromAddress}>`,
+    from: `${ORGANIZATION_NAME} <${fromAddress}>`,
     to: member.email,
     replyTo: ADMIN_EMAIL,
-    subject: "Your Membership ID Card and Certificate - Nisvarthjan Seva Foundation",
+    subject: `Your Membership ID Card and Certificate - ${ORGANIZATION_NAME}`,
     html: wrapEmailTemplate(content, "Membership Documents", logoUrl),
     attachments: [
       {

@@ -31,7 +31,7 @@ function get80GDetails() {
       process.env.DONATION_REGISTERED_ADDRESS ||
       process.env.NGO_ADDRESS ||
       process.env.NEXT_PUBLIC_NGO_ADDRESS ||
-      "Nisvarthjan Seva Foundation",
+      "PLF - Passion for the Least Foundation",
   };
 }
 

@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     title: body.title,
     description: body.description,
     eventName: body.eventName || null,
-    issuedBy: body.issuedBy || "Nisvarthjan Seva Foundation",
+    issuedBy: body.issuedBy || "PLF - Passion for the Least Foundation",
     templateId: getVisitorTemplate(body.templateId).id,
     status: "issued",
     issuedAt: new Date(),

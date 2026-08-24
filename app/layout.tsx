@@ -13,8 +13,8 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Nisvarthjan Admin",
-  description: "Standalone admin control panel for Nisvarthjan Seva Foundation",
+  title: "PLF Admin",
+  description: "Standalone admin control panel for PLF - Passion for the Least Foundation",
 };
 
 export default function RootLayout({

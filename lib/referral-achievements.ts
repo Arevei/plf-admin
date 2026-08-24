@@ -145,8 +145,9 @@ function drawDigitalStamp(doc: jsPDF, x: number, y: number, color: [number, numb
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...color);
   doc.setFontSize(5.3);
-  doc.text("NISVARTHJAN", x, y - 6.5, { align: "center" });
-  doc.text("SEVA FOUNDATION", x, y - 2, { align: "center" });
+  doc.text("PLF", x, y - 6.5, { align: "center" });
+  doc.setFontSize(4.2);
+  doc.text("PASSION FOR THE LEAST FOUNDATION", x, y - 2, { align: "center", maxWidth: 26 });
   doc.setFontSize(6.4);
   doc.text("DIGITALLY", x, y + 4.5, { align: "center" });
   doc.text("SIGNED", x, y + 9.5, { align: "center" });
