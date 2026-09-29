@@ -93,9 +93,9 @@ function wrapEmailTemplate(content: string, title?: string, logoUrl?: string): s
 }
 
 const membershipFees: Record<MemberDoc["membershipType"], number> = {
-  general: 0,
-  active: 1000,
-  lifetime: 5000,
+  general: 500,
+  active: 1100,
+  lifetime: 5100,
 };
 
 function getTransporter() {

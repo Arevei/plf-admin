@@ -24,6 +24,7 @@ function toResponse(member: MemberDoc) {
     membershipId: member.membershipId,
     status: member.status,
     certificateNumber: member.certificateNumber,
+    paymentMode: member.payment?.mode ?? "manual",
     referral: member.referral ?? null,
     joinedAt: member.joinedAt.toISOString(),
   };
@@ -79,9 +80,14 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     return NextResponse.json({ error: "Member not found" }, { status: 404 });
   }
 
-  const setPayload: Partial<MemberDoc> = { status: newStatus };
-  if ((body.action === "activate" || body.action === "send_documents") && !existing.certificateNumber) {
+  const isManualMembership = !existing.payment || existing.payment.mode === "manual";
+  const issuesDocuments = body.action === "activate" || body.action === "send_documents" || (body.action === "approve" && isManualMembership);
+  const setPayload: Partial<MemberDoc> = { status: body.action === "approve" && isManualMembership ? "active" : newStatus };
+  if (issuesDocuments && !existing.certificateNumber) {
     setPayload.certificateNumber = generateCertificateNumber();
+  }
+  if (body.action === "activate" && existing.payment?.mode === "razorpay" && existing.payment.status !== "paid") {
+    return NextResponse.json({ error: "Razorpay payment must be confirmed before activation" }, { status: 409 });
   }
 
   const updated = await members.findOneAndUpdate({ id }, { $set: setPayload }, { returnDocument: "after" });
@@ -90,7 +96,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     return NextResponse.json({ error: "Failed to update member" }, { status: 500 });
   }
 
-  if (body.action === "approve") {
+  if (body.action === "approve" && !isManualMembership) {
     try {
       const requestUrl = req.headers.get("origin") || "http://localhost:3000";
       await sendMembershipApprovalPaymentEmail(updated, requestUrl);
@@ -108,7 +114,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     }
   }
 
-  if (body.action === "activate" || body.action === "send_documents") {
+  if (issuesDocuments) {
     try {
       const requestUrl = req.headers.get("origin") || "http://localhost:3000";
       const mailResult = await sendMembershipIdCardCertificateEmail(updated, requestUrl);

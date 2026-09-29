@@ -13,11 +13,11 @@ export const visitorCertificateTemplates: Array<{
   background: [number, number, number];
 }> = [
   { id: "classic", name: "PLF Blue", primary: [11, 74, 127], accent: [35, 35, 35], background: [245, 250, 253] },
-  { id: "heritage", name: "Heritage Gold", primary: [146, 97, 16], accent: [84, 55, 20], background: [255, 250, 235] },
-  { id: "service", name: "Service Green", primary: [22, 101, 52], accent: [20, 83, 45], background: [247, 253, 247] },
-  { id: "impact", name: "Impact Blue", primary: [29, 78, 216], accent: [30, 64, 175], background: [248, 251, 255] },
-  { id: "appreciation", name: "Appreciation Plum", primary: [126, 34, 206], accent: [88, 28, 135], background: [253, 247, 255] },
-  { id: "modern", name: "Modern Slate", primary: [51, 65, 85], accent: [15, 23, 42], background: [248, 250, 252] },
+  { id: "heritage", name: "PLF Heritage", primary: [11, 74, 127], accent: [146, 97, 16], background: [244, 249, 252] },
+  { id: "service", name: "PLF Service", primary: [11, 74, 127], accent: [6, 124, 193], background: [244, 249, 252] },
+  { id: "impact", name: "PLF Impact", primary: [11, 74, 127], accent: [30, 64, 175], background: [244, 249, 252] },
+  { id: "appreciation", name: "PLF Appreciation", primary: [11, 74, 127], accent: [6, 124, 193], background: [244, 249, 252] },
+  { id: "modern", name: "PLF Modern", primary: [11, 74, 127], accent: [18, 54, 83], background: [244, 249, 252] },
 ];
 
 export function generateVisitorCertificateNumber() {

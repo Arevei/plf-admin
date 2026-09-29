@@ -178,7 +178,7 @@ export async function generateMembershipCertificatePdf(member: MemberDocumentRec
     width: 180,
   });
 
-  doc.setFillColor(255, 252, 248);
+  doc.setFillColor(244, 249, 252);
   doc.rect(0, 0, 297, 210, "F");
 
   doc.setDrawColor(...BRAND_PRIMARY);
@@ -255,9 +255,9 @@ export async function generateMembershipReceiptPdf(member: MemberDocumentRecord,
   const verifyUrl = `${getVerificationBaseUrl(requestUrl)}/verify?certificateNumber=${encodeURIComponent(receiptNumber)}&documentType=membership-receipt`;
   const qrDataUrl = await QRCode.toDataURL(verifyUrl, { errorCorrectionLevel: "M", margin: 1, width: 180 });
 
-  doc.setFillColor(255, 252, 248);
+  doc.setFillColor(244, 249, 252);
   doc.rect(0, 0, 210, 297, "F");
-  doc.setDrawColor(190, 0, 39);
+  doc.setDrawColor(...BRAND_PRIMARY);
   doc.setLineWidth(1);
   doc.rect(14, 14, 182, 269);
   doc.setLineWidth(0.25);
@@ -270,9 +270,9 @@ export async function generateMembershipReceiptPdf(member: MemberDocumentRecord,
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(20);
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(...BRAND_PRIMARY);
   doc.text("MEMBERSHIP RECEIPT", 105, 62, { align: "center" });
-  doc.setDrawColor(190, 0, 39);
+  doc.setDrawColor(...BRAND_PRIMARY);
   doc.line(55, 69, 155, 69);
 
   doc.addImage(qrDataUrl, "PNG", 155, 30, 24, 24);
@@ -296,7 +296,7 @@ export async function generateMembershipReceiptPdf(member: MemberDocumentRecord,
   rows.forEach(([label, value], index) => {
     const y = 88 + index * 13;
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(190, 0, 39);
+    doc.setTextColor(...BRAND_PRIMARY);
     doc.text(label, 36, y);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(35, 35, 35);
@@ -328,10 +328,10 @@ function fitText(doc: jsPDF, text: string, x: number, y: number, maxWidth: numbe
 function drawIdCardShell(doc: jsPDF) {
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, 85.6, 54, "F");
-  doc.setDrawColor(190, 0, 39);
+  doc.setDrawColor(...BRAND_PRIMARY);
   doc.setLineWidth(0.6);
   doc.roundedRect(1.5, 1.5, 82.6, 51, 3, 3);
-  doc.setFillColor(190, 0, 39);
+  doc.setFillColor(...BRAND_PRIMARY);
   doc.roundedRect(1.5, 1.5, 82.6, 9.5, 3, 3, "F");
   doc.rect(1.5, 7.5, 82.6, 3.5, "F");
 }
@@ -407,18 +407,18 @@ export async function generateMembershipIdCardPdf(member: MemberDocumentRecord, 
   rows.forEach(([label, value], index) => {
     const y = 22 + index * 4.2;
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(190, 0, 39);
+    doc.setTextColor(...BRAND_PRIMARY);
     doc.text(`${label}:`, 29, y);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(39, 39, 42);
     fitText(doc, value, 43, y, 36, 5.6, 4);
   });
 
-  doc.setFillColor(255, 245, 247);
+  doc.setFillColor(244, 249, 252);
   doc.roundedRect(5, 41, 75.6, 5.2, 1.5, 1.5, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(5.2);
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(...BRAND_PRIMARY);
   doc.text("ID NO.", 8, 44.5);
   doc.setTextColor(24, 24, 27);
   fitText(doc, safeText(member.membershipId), 18, 44.5, 59, 5.7, 4);
@@ -448,7 +448,7 @@ export async function generateMembershipIdCardPdf(member: MemberDocumentRecord, 
 
   doc.addImage(qrDataUrl, "PNG", 6, 14, 23, 23);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(...BRAND_PRIMARY);
   doc.setFontSize(4.5);
   doc.text("SCAN TO VERIFY", 17.5, 40, { align: "center" });
 
@@ -463,10 +463,10 @@ export async function generateMembershipIdCardPdf(member: MemberDocumentRecord, 
   doc.text(doc.splitTextToSize(`Email: ${safeText(member.email)}`, 45), 34, 28);
   doc.text(doc.splitTextToSize(`Address: ${safeText(member.address)}`, 45).slice(0, 2), 34, 34);
 
-  doc.setDrawColor(190, 0, 39);
+  doc.setDrawColor(...BRAND_PRIMARY);
   doc.line(34, 43, 78, 43);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(...BRAND_PRIMARY);
   doc.setFontSize(4.3);
   doc.text("This card remains property of the foundation.", 56, 47, { align: "center" });
   doc.text("If found, please contact the issuing authority.", 56, 50, { align: "center" });

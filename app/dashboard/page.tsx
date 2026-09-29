@@ -125,6 +125,7 @@ export default async function DashboardPage() {
       membershipId: item.membershipId,
       status: item.status,
       certificateNumber: item.certificateNumber,
+      paymentMode: item.payment?.mode ?? "manual",
       referral: item.referral
         ? {
             ...item.referral,
@@ -149,6 +150,9 @@ export default async function DashboardPage() {
     campaignTitle: item.campaignId ? campaignTitleById.get(item.campaignId) ?? null : null,
     purpose: item.purpose,
     receiptNumber: item.receiptNumber,
+    proofImageUrl: item.proofImageUrl ?? null,
+    reviewedAt: item.reviewedAt ? item.reviewedAt.toISOString() : null,
+    reviewedBy: item.reviewedBy ?? null,
     status: item.status ?? "paid",
     referral: item.referral
       ? {

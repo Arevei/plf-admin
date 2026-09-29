@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f4f5;
-  --foreground: #18181b;
+  --background: #f4f9fc;
+  --foreground: #123653;
+  --plf-primary: #0b4a7f;
+  --plf-secondary: #067cc1;
+  --plf-accent: #f5b915;
 }
 
 @theme inline {
@@ -10,6 +13,17 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-manrope);
   --font-serif: var(--font-lora);
+  --color-rose-50: #f4f9fc;
+  --color-rose-100: #e5f2fa;
+  --color-rose-200: #c7e3f4;
+  --color-rose-300: #94c9e8;
+  --color-rose-400: #50a8d8;
+  --color-rose-500: #1788c7;
+  --color-rose-600: #067cc1;
+  --color-rose-700: #0b4a7f;
+  --color-rose-800: #0a3d69;
+  --color-rose-900: #123653;
+  --color-rose-950: #08253c;
 }
 
 body {
@@ -51,7 +65,7 @@ h3 {
 }
 
 .ProseMirror blockquote {
-  border-left: 3px solid #be123c;
+  border-left: 3px solid #0b4a7f;
   margin: 0.8rem 0;
   padding-left: 0.75rem;
   color: #52525b;

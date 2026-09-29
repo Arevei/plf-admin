@@ -22,6 +22,7 @@ function toResponse(member: MemberDoc, donationStats = { count: 0, amount: 0 }) 
     membershipId: member.membershipId,
     status: member.status,
     certificateNumber: member.certificateNumber,
+    paymentMode: member.payment?.mode ?? "manual",
     referral: member.referral ?? null,
     donationAmount: donationStats.amount,
     donationCount: donationStats.count,

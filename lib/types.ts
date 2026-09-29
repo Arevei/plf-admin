@@ -106,6 +106,9 @@ export interface DonationDoc {
   campaignId?: number | null;
   purpose: string;
   receiptNumber: string;
+  proofImageUrl?: string | null;
+  reviewedAt?: Date | null;
+  reviewedBy?: string | null;
   status?: string;
   referral?: ReferralInfo | null;
   payment?: {

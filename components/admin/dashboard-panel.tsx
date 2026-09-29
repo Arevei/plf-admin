@@ -37,6 +37,7 @@ type MemberItem = {
   membershipId: string;
   status: string;
   certificateNumber: string | null;
+  paymentMode: "manual" | "razorpay";
   referral: ReferralInfo | null;
   donationAmount: number;
   donationCount: number;
@@ -102,6 +103,9 @@ type DonationItem = {
   campaignTitle: string | null;
   purpose: string;
   receiptNumber: string;
+  proofImageUrl?: string | null;
+  reviewedAt?: string | null;
+  reviewedBy?: string | null;
   status: string;
   referral: ReferralInfo | null;
   paymentMode: string;
@@ -146,7 +150,7 @@ const newsCategories = ["general", "health", "education", "environment", "women"
 const galleryCategories = ["events", "education", "health", "environment", "women", "rural", "donation", "general"];
 const donationPaymentModes = ["cash", "upi", "bank_transfer", "other", "manual"] as const;
 const visitorCertificateTemplates: Array<{ id: VisitorCertificateItem["templateId"]; name: string; tone: string }> = [
-  { id: "classic", name: "Classic Red", tone: "border-rose-300 bg-rose-50 text-rose-800" },
+  { id: "classic", name: "PLF Blue", tone: "border-rose-300 bg-rose-50 text-rose-800" },
   { id: "heritage", name: "Heritage Gold", tone: "border-amber-300 bg-amber-50 text-amber-800" },
   { id: "service", name: "Service Green", tone: "border-emerald-300 bg-emerald-50 text-emerald-800" },
   { id: "impact", name: "Impact Blue", tone: "border-blue-300 bg-blue-50 text-blue-800" },
@@ -308,6 +312,8 @@ export function DashboardPanel({
   });
   const [memberMessageStatus, setMemberMessageStatus] = useState("");
   const [defaultLanguage, setDefaultLanguage] = useState<"en" | "hi">("hi");
+  const [membershipPaymentMode, setMembershipPaymentMode] = useState<"razorpay" | "manual">("razorpay");
+  const [donationPaymentMode, setDonationPaymentMode] = useState<"razorpay" | "manual">("razorpay");
   const [siteSettingsStatus, setSiteSettingsStatus] = useState("");
 
   const [newsForm, setNewsForm] = useState({
@@ -520,10 +526,12 @@ export function DashboardPanel({
     fetch("/api/site-settings", { credentials: "include" })
       .then(async (response) => {
         if (!response.ok) throw new Error("Failed to load site settings");
-        const data = (await response.json()) as { defaultLanguage?: "en" | "hi" };
+        const data = (await response.json()) as { defaultLanguage?: "en" | "hi"; membershipPaymentMode?: "razorpay" | "manual"; donationPaymentMode?: "razorpay" | "manual" };
         if (data.defaultLanguage === "en" || data.defaultLanguage === "hi") {
           setDefaultLanguage(data.defaultLanguage);
         }
+        setMembershipPaymentMode(data.membershipPaymentMode === "manual" ? "manual" : "razorpay");
+        setDonationPaymentMode(data.donationPaymentMode === "manual" ? "manual" : "razorpay");
       })
       .catch((loadError) => {
         setError(loadError instanceof Error ? loadError.message : "Failed to load site settings");
@@ -539,7 +547,7 @@ export function DashboardPanel({
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ defaultLanguage }),
+        body: JSON.stringify({ defaultLanguage, membershipPaymentMode, donationPaymentMode }),
       });
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as { error?: string } | null;
@@ -1124,6 +1132,18 @@ export function DashboardPanel({
     }
   };
 
+  const reviewDonation = async (id: number, action: "approve" | "reject") => {
+    setBusy(true); setError("");
+    try {
+      const response = await fetch(`/api/donations/${id}`, { method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action }) });
+      const payload = await response.json().catch(() => null) as { error?: string; emailSent?: boolean } | null;
+      if (!response.ok && response.status !== 207) throw new Error(payload?.error || "Failed to review donation");
+      if (response.status === 207 || payload?.emailSent === false && action === "approve") setError(payload?.error || "Donation approved, but receipt email failed.");
+      await refreshAll();
+    } catch (reviewError) { setError(reviewError instanceof Error ? reviewError.message : "Failed to review donation"); }
+    finally { setBusy(false); }
+  };
+
   const resetVisitorCertificateForm = () => {
     setVisitorCertificateForm({
       recipientName: "",
@@ -1465,10 +1485,10 @@ export function DashboardPanel({
                         onClick={() => memberAction(member.id, "approve")}
                         className="rounded-md border border-blue-300 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 disabled:opacity-60"
                       >
-                        Approve & Send QR
+                        {member.paymentMode === "manual" ? "Approve & Issue Documents" : "Approve & Send QR"}
                       </button>
                     )}
-                    {(member.status === "payment_pending" || member.status === "approval_pending") && (
+                    {member.status === "approval_pending" && (
                       <button
                         type="button"
                         disabled={busy}
@@ -1734,6 +1754,11 @@ export function DashboardPanel({
                             Verify
                           </a>
                         </>
+                      ) : donation.paymentStatus === "pending_review" ? (
+                        <>
+                          <button type="button" onClick={() => reviewDonation(donation.id, "approve")} disabled={busy} className="rounded-md bg-blue-700 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-800 disabled:opacity-60">Approve &amp; Issue Receipt</button>
+                          <button type="button" onClick={() => reviewDonation(donation.id, "reject")} disabled={busy} className="rounded-md border border-red-300 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-60">Reject</button>
+                        </>
                       ) : (
                         <button
                           type="button"
@@ -1756,6 +1781,10 @@ export function DashboardPanel({
                             <dt className="text-zinc-500">Donor phone</dt>
                             <dd className="text-right text-zinc-800">{donation.donorPhone || "Not provided"}</dd>
                           </div>
+                          {donation.proofImageUrl && <div className="pt-2">
+                            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Payment proof</p>
+                            <a href={donation.proofImageUrl} target="_blank" rel="noreferrer"><img src={donation.proofImageUrl} alt="Payment proof" className="max-h-72 w-full rounded-lg border bg-white object-contain" /></a>
+                          </div>}
                           <div className="flex justify-between gap-4">
                             <dt className="text-zinc-500">Donor PAN</dt>
                             <dd className="text-right text-zinc-800">{donation.donorPan || "Not provided"}</dd>
@@ -2610,7 +2639,7 @@ export function DashboardPanel({
 
       {tab === "siteSettings" && (
         <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-bold text-zinc-950">Website Default Language</h3>
+          <h3 className="text-lg font-bold text-zinc-950">Website and Payment Settings</h3>
           <p className="mt-2 max-w-2xl text-sm text-zinc-600">
             Choose the default language for new visitors. Returning visitors who already picked a language in the navbar keep their saved choice.
           </p>
@@ -2627,6 +2656,18 @@ export function DashboardPanel({
             >
               <option value="hi">Hindi</option>
               <option value="en">English</option>
+            </select>
+
+            <label className="block text-sm font-semibold text-zinc-700" htmlFor="membership-payment-mode">Membership payment mode</label>
+            <select id="membership-payment-mode" value={membershipPaymentMode} onChange={(event) => setMembershipPaymentMode(event.target.value as "razorpay" | "manual")} className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900">
+              <option value="razorpay">Razorpay</option>
+              <option value="manual">Manual approval (no fee)</option>
+            </select>
+
+            <label className="block text-sm font-semibold text-zinc-700" htmlFor="donation-payment-mode">Donation payment mode</label>
+            <select id="donation-payment-mode" value={donationPaymentMode} onChange={(event) => setDonationPaymentMode(event.target.value as "razorpay" | "manual")} className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900">
+              <option value="razorpay">Razorpay</option>
+              <option value="manual">Manual proof approval</option>
             </select>
 
             <button

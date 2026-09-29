@@ -56,9 +56,9 @@ function getMembershipReceiptNumber(member: MemberDoc) {
 function baseReceiptPdf(title: string, rows: Array<[string, string]>) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
-  doc.setFillColor(255, 252, 248);
+  doc.setFillColor(244, 249, 252);
   doc.rect(0, 0, 210, 297, "F");
-  doc.setDrawColor(190, 0, 39);
+  doc.setDrawColor(11, 74, 127);
   doc.setLineWidth(1);
   doc.rect(14, 14, 182, 269);
   doc.setLineWidth(0.25);
@@ -71,7 +71,7 @@ function baseReceiptPdf(title: string, rows: Array<[string, string]>) {
 
   doc.setFont("times", "bold");
   doc.setFontSize(20);
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(11, 74, 127);
   doc.text(title, 105, 66, { align: "center" });
   doc.line(55, 73, 155, 73);
 
@@ -79,7 +79,7 @@ function baseReceiptPdf(title: string, rows: Array<[string, string]>) {
   rows.forEach(([label, value], index) => {
     const y = 92 + index * 13;
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(190, 0, 39);
+    doc.setTextColor(11, 74, 127);
     doc.text(label, 34, y);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(35, 35, 35);
@@ -95,7 +95,7 @@ function baseReceiptPdf(title: string, rows: Array<[string, string]>) {
   doc.line(126, 252, 174, 252);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(11, 74, 127);
   doc.text("Authorized Signature", 150, 258, { align: "center" });
 
   return doc.output("arraybuffer");
@@ -193,7 +193,7 @@ export function generateReceiptReportPdf({
     cash: cashDonations.reduce((total, donation) => total + donation.amount, 0),
   };
 
-  doc.setFillColor(255, 252, 248);
+  doc.setFillColor(244, 249, 252);
   doc.rect(0, 0, 210, 297, "F");
   const logo = getLogo();
   const logoHeight = 18;
@@ -202,7 +202,7 @@ export function generateReceiptReportPdf({
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(11, 74, 127);
   doc.text("Receipt Management Report", 18, 46);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
@@ -219,7 +219,7 @@ export function generateReceiptReportPdf({
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(11, 74, 127);
   doc.text("Receipt Type", 20, 78);
   doc.text("Count", 124, 78);
   doc.text("Total", 170, 78, { align: "right" });
@@ -237,7 +237,7 @@ export function generateReceiptReportPdf({
 
   let y = 158;
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(190, 0, 39);
+  doc.setTextColor(11, 74, 127);
   doc.text("Recent Receipts", 20, y);
   y += 10;
 

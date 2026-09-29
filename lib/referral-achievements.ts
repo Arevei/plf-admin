@@ -168,7 +168,7 @@ export async function generateReferralAchievementCertificatePdf(
   const verificationUrl = `${getVerificationBaseUrl(requestUrl)}/verify?certificateNumber=${encodeURIComponent(achievement.certificateNumber)}&documentType=referral-achievement`;
   const qrDataUrl = await QRCode.toDataURL(verificationUrl, { errorCorrectionLevel: "M", margin: 1, width: 180 });
 
-  doc.setFillColor(255, 252, 248);
+  doc.setFillColor(244, 249, 252);
   doc.rect(0, 0, 297, 210, "F");
   doc.setDrawColor(r, g, b);
   doc.setLineWidth(1.4);
