@@ -21,10 +21,10 @@ import {
   safeText as safeMembershipText,
 } from "@/lib/membership-documents";
 
-const ADMIN_EMAIL = "nisvarthjansevango@gmail.com";
+const ADMIN_EMAIL = "govindrajmichael2@gmail.com";
 const ORGANIZATION_NAME = "PLF - Passion for the Least Foundation";
 const CONTACT_NAME = "R Govind Raji";
-const CONTACT_ADDRESS = "104A, Exotica Eastern Court, Ghaziabad, IN";
+const CONTACT_ADDRESS = "104A, Exotica Eastern Court, Crossing Republic, Ghaziabad, U.P - 201016";
 const CONTACT_PHONE = "+91 9999974145";
 const BRAND_PRIMARY = "#0B4A7F";
 
@@ -93,7 +93,7 @@ function wrapEmailTemplate(content: string, title?: string, logoUrl?: string): s
 }
 
 const membershipFees: Record<MemberDoc["membershipType"], number> = {
-  general: 500,
+  general: 0,
   active: 1000,
   lifetime: 5000,
 };
