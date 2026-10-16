@@ -44,20 +44,14 @@ function formatDate(value: Date | string | undefined) {
   });
 }
 
-function getPngDimensions(buffer: Buffer) {
-  return {
-    width: buffer.readUInt32BE(16),
-    height: buffer.readUInt32BE(20),
-  };
-}
-
 function getLogo() {
-  const logoPath = path.join(process.cwd(), "public", "brand", "logo-stacked.png");
+  const logoPath = path.join(process.cwd(), "public", "email-logo.png");
   const logoBuffer = readFileSync(logoPath);
+  const isJpeg = logoBuffer[0] === 0xff && logoBuffer[1] === 0xd8;
 
   return {
-    dataUrl: `data:image/png;base64,${logoBuffer.toString("base64")}`,
-    ...getPngDimensions(logoBuffer),
+    dataUrl: `data:${isJpeg ? "image/jpeg" : "image/png"};base64,${logoBuffer.toString("base64")}`,
+    format: isJpeg ? "JPEG" : "PNG",
   };
 }
 
@@ -138,9 +132,10 @@ export async function generateDonationReceiptPdf(donation: DonationDoc, requestU
   doc.roundedRect(14, cardTop, 182, cardHeight, 3, 3);
 
   const logo = getLogo();
+  const logoProperties = doc.getImageProperties(logo.dataUrl);
   const logoHeight = 18;
-  const logoWidth = logoHeight * (logo.width / logo.height);
-  doc.addImage(logo.dataUrl, "PNG", 22, 10, logoWidth, logoHeight);
+  const logoWidth = logoHeight * (logoProperties.width / logoProperties.height);
+  doc.addImage(logo.dataUrl, logo.format, 22, 10, logoWidth, logoHeight);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(17);

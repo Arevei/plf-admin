@@ -27,20 +27,14 @@ function formatDate(value: Date | string | null | undefined) {
   });
 }
 
-function getPngDimensions(buffer: Buffer) {
-  return {
-    width: buffer.readUInt32BE(16),
-    height: buffer.readUInt32BE(20),
-  };
-}
-
 function getLogo() {
-  const logoPath = path.join(process.cwd(), "public", "brand", "logo-stacked.png");
+  const logoPath = path.join(process.cwd(), "public", "email-logo.png");
   const logoBuffer = readFileSync(logoPath);
+  const isJpeg = logoBuffer[0] === 0xff && logoBuffer[1] === 0xd8;
 
   return {
-    dataUrl: `data:image/png;base64,${logoBuffer.toString("base64")}`,
-    ...getPngDimensions(logoBuffer),
+    dataUrl: `data:${isJpeg ? "image/jpeg" : "image/png"};base64,${logoBuffer.toString("base64")}`,
+    format: isJpeg ? "JPEG" : "PNG",
   };
 }
 
@@ -65,9 +59,10 @@ function baseReceiptPdf(title: string, rows: Array<[string, string]>) {
   doc.rect(20, 20, 170, 257);
 
   const logo = getLogo();
+  const logoProperties = doc.getImageProperties(logo.dataUrl);
   const logoHeight = 22;
-  const logoWidth = logoHeight * (logo.width / logo.height);
-  doc.addImage(logo.dataUrl, "PNG", (210 - logoWidth) / 2, 27, logoWidth, logoHeight);
+  const logoWidth = logoHeight * (logoProperties.width / logoProperties.height);
+  doc.addImage(logo.dataUrl, logo.format, (210 - logoWidth) / 2, 27, logoWidth, logoHeight);
 
   doc.setFont("times", "bold");
   doc.setFontSize(20);
@@ -196,9 +191,10 @@ export function generateReceiptReportPdf({
   doc.setFillColor(244, 249, 252);
   doc.rect(0, 0, 210, 297, "F");
   const logo = getLogo();
+  const logoProperties = doc.getImageProperties(logo.dataUrl);
   const logoHeight = 18;
-  const logoWidth = logoHeight * (logo.width / logo.height);
-  doc.addImage(logo.dataUrl, "PNG", 18, 14, logoWidth, logoHeight);
+  const logoWidth = logoHeight * (logoProperties.width / logoProperties.height);
+  doc.addImage(logo.dataUrl, logo.format, 18, 14, logoWidth, logoHeight);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
