@@ -2,27 +2,17 @@
 
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { CloudinaryUpload } from "@/components/admin/cloudinary-upload";
 import { EnquiryManagementPanel, type EnquiryItem } from "@/components/admin/enquiry-management-panel";
 import { ReceiptDashboardPanel, type DonationReceiptItem, type MembershipReceiptItem } from "@/components/admin/receipt-dashboard-panel";
 import { ReferralTrackingPanel, type ReferralMemberRow } from "@/components/admin/referral-tracking-panel";
+import { EmptySearchResult, ListToolbar, Pagination, usePagedSearch } from "@/components/admin/list-controls";
+import { ADMIN_NAV_GROUPS, ADMIN_SECTIONS, sectionFromPathname, sectionHref, type AdminSection } from "@/lib/admin-sections";
 
-type Tab =
-  | "home"
-  | "members"
-  | "donations"
-  | "analytics"
-  | "referrals"
-  | "receipts"
-  | "enquiries"
-  | "broadcasts"
-  | "news"
-  | "campaigns"
-  | "gallery"
-  | "visitorCertificates"
-  | "siteSettings";
+type Tab = AdminSection;
 
 type MemberItem = {
   id: number;
@@ -286,7 +276,16 @@ export function DashboardPanel({
   const newsTitleInputRef = useRef<HTMLInputElement | null>(null);
   const campaignFormRef = useRef<HTMLDivElement | null>(null);
   const campaignTitleInputRef = useRef<HTMLInputElement | null>(null);
-  const [tab, setTab] = useState<Tab>("home");
+  const pathname = usePathname();
+  const tab = sectionFromPathname(pathname);
+  const setTab = (next: Tab) => router.push(sectionHref(next));
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPathname, setMenuPathname] = useState(pathname);
+  // Close the mobile menu whenever the route changes.
+  if (menuPathname !== pathname) {
+    setMenuPathname(pathname);
+    setMenuOpen(false);
+  }
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [busy, setBusy] = useState(false);
@@ -497,21 +496,21 @@ export function DashboardPanel({
     const max = Math.max(...buckets.map((bucket) => bucket.total), 1);
     return buckets.map((bucket) => ({ ...bucket, height: bucket.total > 0 ? Math.max(8, Math.round((bucket.total / max) * 100)) : 0 }));
   }, [donationTrendMode, paidDonations]);
-  const tabTitle = {
-    home: "Home Dashboard",
-    members: "Membership Management",
-    donations: "Donation Management",
-    analytics: "Analytics",
-    referrals: "Referral Tracking",
-    receipts: "Receipt Dashboard",
-    enquiries: "Enquiry Management",
-    broadcasts: "Member Messages",
-    news: "News Management",
-    campaigns: "Campaign Management",
-    gallery: "Activity Posts",
-    visitorCertificates: "Visitor Certificates",
-    siteSettings: "Site Settings",
-  }[tab];
+  const memberList = usePagedSearch(members, (member) =>
+    [member.name, member.email, member.phone, member.membershipId, member.status, member.city, member.state, member.id].join(" "),
+  );
+  const donationList = usePagedSearch(donations, (donation) =>
+    [donation.donorName, donation.donorEmail, donation.donorPhone, donation.receiptNumber, donation.purpose, donation.campaignTitle, donation.status, donation.paymentMode, donation.orderId, donation.paymentId, donation.referral?.membershipId].join(" "),
+  );
+  const newsList = usePagedSearch(news, (item) => [item.title, item.titleHindi, item.category, item.author].join(" "));
+  const campaignList = usePagedSearch(campaigns, (item) =>
+    [item.title, item.titleHindi, item.category, item.isActive ? "active" : "inactive"].join(" "),
+  );
+  const galleryList = usePagedSearch(gallery, (item) => [item.caption, item.captionHindi, item.category].join(" "), 12);
+  const visitorCertificateList = usePagedSearch(visitorCertificates, (certificate) =>
+    [certificate.certificateNumber, certificate.recipientName, certificate.recipientEmail, certificate.recipientPhone, certificate.title, certificate.eventName, certificate.status].join(" "),
+  );
+  const section = ADMIN_SECTIONS[tab];
 
   const scrollToEditorForm = (formRef: RefObject<HTMLDivElement | null>, focusRef: RefObject<HTMLInputElement | null>) => {
     window.setTimeout(() => {
@@ -1236,89 +1235,98 @@ export function DashboardPanel({
     }
   };
 
-  return (
-    <div className="grid min-h-screen gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-      <aside className="rounded-3xl border border-zinc-200 bg-white p-4 shadow-sm lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)] lg:overflow-y-auto">
-        <div className="rounded-2xl bg-rose-700 p-4 text-white">
-          <div className="mb-3 flex justify-center rounded-xl bg-white px-3 py-2.5">
-            <Image
-              src="/brand/logo-navbar.png"
-              alt="PLF - Passion for the Least Foundation"
-              width={220}
-              height={56}
-              className=""
-            />
+  const sidebar = (
+    <div className="flex h-full flex-col">
+      <Link href="/dashboard" className="block rounded-2xl bg-white px-3 py-2.5 shadow-sm">
+        <Image src="/brand/navbar-logo.png" alt="PLF - Passion for the Least Foundation" width={200} height={86} priority className="mx-auto h-16 w-auto" />
+      </Link>
+      <div className="mt-4 rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3">
+        <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#e2bd61]">Admin panel</p>
+        <p className="mt-1 truncate text-sm text-white/75" title={email}>{email}</p>
+      </div>
+
+      <nav aria-label="Admin sections" className="mt-5 flex-1 space-y-5">
+        {ADMIN_NAV_GROUPS.map((group) => (
+          <div key={group.label}>
+            <p className="px-3 text-[10px] font-bold uppercase tracking-[.2em] text-white/45">{group.label}</p>
+            <ul className="mt-2 space-y-1">
+              {group.items.map((item) => {
+                const active = tab === item;
+                return (
+                  <li key={item}>
+                    <Link
+                      href={sectionHref(item)}
+                      aria-current={active ? "page" : undefined}
+                      className={`relative flex items-center rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
+                        active ? "bg-white text-[#0b4a7f] shadow-sm" : "text-white/75 hover:bg-white/[.08] hover:text-white"
+                      }`}
+                    >
+                      {active && <span aria-hidden="true" className="absolute -left-4 top-2 bottom-2 w-1 rounded-r-full bg-[#e2bd61]" />}
+                      {ADMIN_SECTIONS[item].label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-rose-100">Admin Panel</p>
-              <h1 className="mt-2 text-xl font-bold">PLF</h1>
-          <p className="mt-1 truncate text-xs text-rose-100">{email}</p>
-        </div>
+        ))}
+      </nav>
 
-        <nav className="mt-4 space-y-2">
-          <details open className="rounded-xl border border-zinc-200 bg-zinc-50 p-2">
-            <summary className="cursor-pointer px-2 py-1 text-xs font-bold uppercase tracking-wide text-zinc-500">Overview</summary>
-            <div className="mt-2 grid gap-1">
-              {(["home", "analytics"] as Tab[]).map((item) => (
-                <button key={item} type="button" onClick={() => setTab(item)} className={`rounded-lg px-3 py-2 text-left text-sm font-semibold ${tab === item ? "bg-rose-700 text-white" : "text-zinc-700 hover:bg-white"}`}>
-                  {item === "home" ? "Dashboard Home" : "Analytics"}
-                </button>
-              ))}
-            </div>
-          </details>
-
-          <details open className="rounded-xl border border-zinc-200 bg-zinc-50 p-2">
-            <summary className="cursor-pointer px-2 py-1 text-xs font-bold uppercase tracking-wide text-zinc-500">People & Money</summary>
-            <div className="mt-2 grid gap-1">
-              {(["members", "donations", "referrals", "receipts", "visitorCertificates"] as Tab[]).map((item) => (
-                <button key={item} type="button" onClick={() => setTab(item)} className={`rounded-lg px-3 py-2 text-left text-sm font-semibold ${tab === item ? "bg-rose-700 text-white" : "text-zinc-700 hover:bg-white"}`}>
-                  {item === "visitorCertificates"
-                    ? "Visitor Certificates"
-                    : item === "referrals"
-                      ? "Referral Tracking"
-                      : item === "receipts"
-                        ? "Receipt Dashboard"
-                        : item.charAt(0).toUpperCase() + item.slice(1)}
-                </button>
-              ))}
-            </div>
-          </details>
-
-          <details open className="rounded-xl border border-zinc-200 bg-zinc-50 p-2">
-            <summary className="cursor-pointer px-2 py-1 text-xs font-bold uppercase tracking-wide text-zinc-500">Content</summary>
-            <div className="mt-2 grid gap-1">
-              {(["campaigns", "news", "gallery", "enquiries", "broadcasts", "siteSettings"] as Tab[]).map((item) => (
-                <button key={item} type="button" onClick={() => setTab(item)} className={`rounded-lg px-3 py-2 text-left text-sm font-semibold ${tab === item ? "bg-rose-700 text-white" : "text-zinc-700 hover:bg-white"}`}>
-                  {item === "gallery"
-                    ? "Activity Posts"
-                    : item === "enquiries"
-                      ? "Enquiries"
-                      : item === "broadcasts"
-                        ? "Member Messages"
-                        : item === "siteSettings"
-                          ? "Site Settings"
-                          : item.charAt(0).toUpperCase() + item.slice(1)}
-                </button>
-              ))}
-            </div>
-          </details>
-        </nav>
-
-        <button type="button" onClick={logout} className="mt-4 w-full rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50">
-          Logout
+      <div className="mt-6 space-y-2 border-t border-white/10 pt-4">
+        <a href={publicSiteUrl} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-white/75 transition hover:bg-white/[.08] hover:text-white">
+          View website <span aria-hidden="true">↗</span>
+        </a>
+        <button type="button" onClick={logout} className="w-full rounded-xl border border-white/20 px-3 py-2.5 text-left text-sm font-semibold text-white transition hover:bg-white hover:text-[#0b4a7f]">
+          Log out
         </button>
-      </aside>
+      </div>
+    </div>
+  );
 
-      <section className="min-w-0 space-y-6">
-        <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-rose-700">Command Center</p>
-              <h2 className="mt-1 text-2xl font-bold text-zinc-950">{tabTitle}</h2>
-            </div>
-            <button type="button" onClick={refreshQueue} className="rounded-md border border-zinc-300 bg-zinc-100 px-3 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-200">
-              Refresh
+  return (
+    <div className="min-h-screen lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
+      <aside className="hidden bg-[#061d31] px-4 py-5 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">{sidebar}</aside>
+
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#dce5e9] bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
+        <Link href="/dashboard" aria-label="PLF admin home">
+          <Image src="/brand/navbar-logo.png" alt="PLF - Passion for the Least Foundation" width={120} height={51} className="h-10 w-auto" />
+        </Link>
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          aria-expanded={menuOpen}
+          aria-controls="admin-mobile-menu"
+          className="rounded-xl border border-[#dce5e9] px-3 py-2 text-sm font-semibold text-[#172d3f]"
+        >
+          Menu
+        </button>
+      </header>
+
+      {menuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Admin menu">
+          <button type="button" aria-label="Close menu" onClick={() => setMenuOpen(false)} className="absolute inset-0 bg-[#061d31]/60 backdrop-blur-sm" />
+          <div id="admin-mobile-menu" className="absolute inset-y-0 left-0 w-[86%] max-w-xs overflow-y-auto bg-[#061d31] px-4 py-5 shadow-2xl">
+            <button type="button" onClick={() => setMenuOpen(false)} className="mb-4 ml-auto block rounded-lg px-2 py-1 text-sm font-semibold text-white/75 hover:text-white">
+              Close ✕
             </button>
+            {sidebar}
           </div>
+        </div>
+      )}
+
+      <main className="min-w-0 space-y-6 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+        <div className="flex flex-col gap-4 rounded-[24px] border border-[#dce5e9] bg-white p-6 shadow-[0_14px_40px_rgba(23,45,63,.06)] sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <nav aria-label="Breadcrumb" className="text-xs font-medium text-[#7b8c95]">
+              <Link href="/dashboard" className="hover:text-[#0b4a7f]">Admin</Link>
+              {tab !== "home" && <><span className="mx-1.5">/</span><span className="text-[#0b4a7f]">{section.label}</span></>}
+            </nav>
+            <h1 className="mt-2 text-2xl font-bold text-[#172d3f] sm:text-3xl">{section.title}</h1>
+            <p className="mt-1.5 text-sm text-[#5d6b73]">{section.description}</p>
+          </div>
+          <button type="button" onClick={refreshQueue} className="shrink-0 self-start rounded-xl border border-[#dce5e9] bg-[#f7fbfc] px-4 py-2.5 text-sm font-semibold text-[#172d3f] transition hover:border-[#0b4a7f] hover:text-[#0b4a7f] sm:self-auto">
+            Refresh data
+          </button>
         </div>
 
       {error && <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
@@ -1451,11 +1459,13 @@ export function DashboardPanel({
             </p>
           </div>
 
+          <ListToolbar state={memberList} label="Search members" placeholder="Search by name, email, phone, membership ID or city" />
+
           <div className="space-y-3">
-            {members.map((member) => (
+            {memberList.pageItems.map((member) => (
               <div key={member.id} className="rounded-xl border border-zinc-200 bg-white p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 basis-64">
                     <div className="mb-1 flex flex-wrap items-center gap-2">
                       <h3 className="text-base font-semibold text-zinc-900">{member.name}</h3>
                       <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(member.status)}`}>
@@ -1537,7 +1547,9 @@ export function DashboardPanel({
                 No membership records found.
               </div>
             )}
+            {members.length > 0 && memberList.filteredCount === 0 && <EmptySearchResult query={memberList.query} onClear={() => memberList.setQuery("")} />}
           </div>
+          <Pagination state={memberList} />
         </div>
       )}
 
@@ -1649,7 +1661,7 @@ export function DashboardPanel({
                       setDonationForm((previous) => ({ ...previous, memberId: "" }));
                     }}
                     className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-                    placeholder="Search NSF ID, name, email, or phone"
+                    placeholder="Search membership ID, name, email, or phone"
                   />
                   {memberSearchResults.length > 0 && (
                     <div className="mt-2 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
@@ -1702,14 +1714,16 @@ export function DashboardPanel({
             </div>
           </div>
 
+          <ListToolbar state={donationList} label="Search donations" placeholder="Search by donor, email, phone, receipt, purpose or campaign" />
+
           <div className="space-y-3">
-            {donations.map((donation) => {
+            {donationList.pageItems.map((donation) => {
               const expanded = expandedDonationId === donation.id;
               const isPaid = donation.paymentStatus === "paid";
               return (
                 <div key={donation.id} className="rounded-xl border border-zinc-200 bg-white p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1 basis-64">
                       <div className="mb-1 flex flex-wrap items-center gap-2">
                         <h3 className="text-base font-semibold text-zinc-900">{donation.donorName}</h3>
                         <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(donation.paymentStatus)}`}>
@@ -1849,7 +1863,9 @@ export function DashboardPanel({
                 No donation payments found.
               </div>
             )}
+            {donations.length > 0 && donationList.filteredCount === 0 && <EmptySearchResult query={donationList.query} onClear={() => donationList.setQuery("")} />}
           </div>
+          <Pagination state={donationList} />
         </div>
       )}
 
@@ -2048,11 +2064,13 @@ export function DashboardPanel({
             </button>
           </div>
 
+          <ListToolbar state={newsList} label="Search news" placeholder="Search news by title, category or author" />
+
           <div className="space-y-3">
-            {news.map((item) => (
+            {newsList.pageItems.map((item) => (
               <div key={item.id} className="rounded-xl border border-zinc-200 bg-white p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 basis-64">
                     <p className="text-xs text-zinc-500">
                       {item.category} | {new Date(item.publishedAt).toLocaleDateString()}
                     </p>
@@ -2091,7 +2109,14 @@ export function DashboardPanel({
                 </div>
               </div>
             ))}
+            {news.length === 0 && (
+              <div className="rounded-xl border border-dashed border-zinc-300 bg-white p-8 text-center text-sm text-zinc-500">
+                No news published yet.
+              </div>
+            )}
+            {news.length > 0 && newsList.filteredCount === 0 && <EmptySearchResult query={newsList.query} onClear={() => newsList.setQuery("")} />}
           </div>
+          <Pagination state={newsList} />
         </div>
       )}
 
@@ -2174,11 +2199,13 @@ export function DashboardPanel({
             </button>
           </div>
 
+          <ListToolbar state={campaignList} label="Search campaigns" placeholder="Search campaigns by title, category or status" />
+
           <div className="space-y-3">
-            {campaigns.map((item) => (
+            {campaignList.pageItems.map((item) => (
               <div key={item.id} className="rounded-xl border border-zinc-200 bg-white p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 basis-64">
                     <p className="text-xs text-zinc-500">{item.category} | Goal Rs {item.goalAmount.toLocaleString("en-IN")}</p>
                     {(item.startDate || item.endDate) && (
                       <p className="mt-1 text-xs text-zinc-500">
@@ -2222,7 +2249,14 @@ export function DashboardPanel({
                 </div>
               </div>
             ))}
+            {campaigns.length === 0 && (
+              <div className="rounded-xl border border-dashed border-zinc-300 bg-white p-8 text-center text-sm text-zinc-500">
+                No campaigns created yet.
+              </div>
+            )}
+            {campaigns.length > 0 && campaignList.filteredCount === 0 && <EmptySearchResult query={campaignList.query} onClear={() => campaignList.setQuery("")} />}
           </div>
+          <Pagination state={campaignList} />
         </div>
       )}
 
@@ -2425,8 +2459,10 @@ export function DashboardPanel({
             </button>
           </div>
 
+          <ListToolbar state={galleryList} label="Search activity posts" placeholder="Search activity posts by caption or category" />
+
           <div className="grid gap-4 md:grid-cols-2">
-            {gallery.map((item) => {
+            {galleryList.pageItems.map((item) => {
               const itemImages = normalizeGalleryImages(item);
 
               return (
@@ -2500,7 +2536,9 @@ export function DashboardPanel({
                 No activity posts found. Add the first activity image above.
               </div>
             )}
+            {gallery.length > 0 && galleryList.filteredCount === 0 && <div className="md:col-span-2"><EmptySearchResult query={galleryList.query} onClear={() => galleryList.setQuery("")} /></div>}
           </div>
+          <Pagination state={galleryList} />
         </div>
       )}
 
@@ -2571,13 +2609,15 @@ export function DashboardPanel({
             </button>
           </div>
 
+          <ListToolbar state={visitorCertificateList} label="Search visitor certificates" placeholder="Search by name, email, certificate number or event" />
+
           <div className="space-y-3">
-            {visitorCertificates.map((certificate) => {
+            {visitorCertificateList.pageItems.map((certificate) => {
               const template = visitorCertificateTemplates.find((item) => item.id === certificate.templateId) ?? visitorCertificateTemplates[0];
               return (
                 <div key={certificate.id} className="rounded-xl border border-zinc-200 bg-white p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1 basis-64">
                       <div className="mb-1 flex flex-wrap items-center gap-2">
                         <h3 className="text-base font-semibold text-zinc-900">{certificate.recipientName}</h3>
                         <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(certificate.status)}`}>
@@ -2633,7 +2673,9 @@ export function DashboardPanel({
                 No visitor certificates issued yet.
               </div>
             )}
+            {visitorCertificates.length > 0 && visitorCertificateList.filteredCount === 0 && <EmptySearchResult query={visitorCertificateList.query} onClear={() => visitorCertificateList.setQuery("")} />}
           </div>
+          <Pagination state={visitorCertificateList} />
         </div>
       )}
 
@@ -2683,7 +2725,7 @@ export function DashboardPanel({
           </div>
         </div>
       )}
-      </section>
+      </main>
     </div>
   );
 }

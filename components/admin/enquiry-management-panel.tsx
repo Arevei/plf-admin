@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Pagination, usePagedSearch } from "@/components/admin/list-controls";
 import Link from "next/link";
 
 type EnquiryStatus = "new" | "in_review" | "replied" | "closed";
@@ -78,6 +79,8 @@ export function EnquiryManagementPanel({
     });
   }, [enquiries, query, statusFilter]);
 
+  // Search and status filtering happen above; this only pages the filtered result.
+  const enquiryPages = usePagedSearch(filteredEnquiries, () => "");
   const totals = useMemo(
     () => ({
       total: enquiries.length,
@@ -187,12 +190,12 @@ export function EnquiryManagementPanel({
       {error && <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
       <div className="space-y-3">
-        {filteredEnquiries.map((enquiry) => {
+        {enquiryPages.pageItems.map((enquiry) => {
           const expanded = expandedId === enquiry.id;
           return (
             <div key={enquiry.id} className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 basis-64">
                   <div className="mb-1 flex flex-wrap items-center gap-2">
                     <h3 className="text-base font-semibold text-zinc-900">{enquiry.name}</h3>
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(enquiry.status)}`}>
@@ -277,6 +280,7 @@ export function EnquiryManagementPanel({
           </div>
         )}
       </div>
+      <Pagination state={enquiryPages} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ListToolbar, Pagination, usePagedSearch } from "@/components/admin/list-controls";
 import type { ReactNode } from "react";
 import Link from "next/link";
 
@@ -67,6 +68,11 @@ export function ReceiptDashboardPanel({
     [initialDonationReceipts],
   );
 
+  const receiptSearchText = (receipt: { receiptNumber: string; paymentMode: string; status: string } & Record<string, unknown>) =>
+    Object.values(receipt).filter((value) => typeof value === "string" || typeof value === "number").join(" ");
+  const membershipList = usePagedSearch(initialMembershipReceipts, receiptSearchText);
+  const donationList = usePagedSearch(initialDonationReceipts, receiptSearchText);
+  const cashList = usePagedSearch(cashDonationReceipts, receiptSearchText);
   const totals = useMemo(() => {
     const membershipTotal = initialMembershipReceipts.reduce((total, receipt) => total + receipt.amount, 0);
     const donationTotal = initialDonationReceipts.reduce((total, receipt) => total + receipt.amount, 0);
@@ -161,10 +167,23 @@ export function ReceiptDashboardPanel({
         ))}
       </div>
 
+      <ListToolbar
+        label="Search receipts"
+        placeholder="Search by name, email, receipt number, membership ID or purpose"
+        state={{
+          query: membershipList.query,
+          setQuery: (value: string) => [membershipList, donationList, cashList].forEach((list) => list.setQuery(value)),
+          filteredCount:
+            (showMembership ? membershipList.filteredCount : 0) + (showDonation ? donationList.filteredCount : 0) + (showCash ? cashList.filteredCount : 0),
+          totalCount:
+            (showMembership ? membershipList.totalCount : 0) + (showDonation ? donationList.totalCount : 0) + (showCash ? cashList.totalCount : 0),
+        }}
+      />
+
       <div className="space-y-4">
         {showMembership && (
-          <ReceiptSection title="Membership Payment Receipts" empty={!initialMembershipReceipts.length}>
-            {initialMembershipReceipts.map((receipt) => (
+          <ReceiptSection title="Membership Payment Receipts" empty={!membershipList.filteredCount} footer={<Pagination state={membershipList} />}>
+            {membershipList.pageItems.map((receipt) => (
               <ReceiptRow
                 key={`membership-${receipt.id}`}
                 label={receipt.memberName}
@@ -181,8 +200,8 @@ export function ReceiptDashboardPanel({
         )}
 
         {showDonation && (
-          <ReceiptSection title="Donation Payment Receipts" empty={!initialDonationReceipts.length}>
-            {initialDonationReceipts.map((receipt) => (
+          <ReceiptSection title="Donation Payment Receipts" empty={!donationList.filteredCount} footer={<Pagination state={donationList} />}>
+            {donationList.pageItems.map((receipt) => (
               <ReceiptRow
                 key={`donation-${receipt.id}`}
                 label={receipt.donorName}
@@ -199,8 +218,8 @@ export function ReceiptDashboardPanel({
         )}
 
         {showCash && (
-          <ReceiptSection title="Cash Donation Receipts" empty={!cashDonationReceipts.length}>
-            {cashDonationReceipts.map((receipt) => (
+          <ReceiptSection title="Cash Donation Receipts" empty={!cashList.filteredCount} footer={<Pagination state={cashList} />}>
+            {cashList.pageItems.map((receipt) => (
               <ReceiptRow
                 key={`cash-${receipt.id}`}
                 label={receipt.donorName}
@@ -220,7 +239,7 @@ export function ReceiptDashboardPanel({
   );
 }
 
-function ReceiptSection({ title, empty, children }: { title: string; empty: boolean; children: ReactNode }) {
+function ReceiptSection({ title, empty, children, footer }: { title: string; empty: boolean; children: ReactNode; footer?: ReactNode }) {
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
       <h2 className="text-lg font-bold text-zinc-900">{title}</h2>
@@ -233,6 +252,7 @@ function ReceiptSection({ title, empty, children }: { title: string; empty: bool
           children
         )}
       </div>
+      {!empty && footer}
     </div>
   );
 }
@@ -259,7 +279,7 @@ function ReceiptRow({
   return (
     <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 basis-64">
           <div className="mb-1 flex flex-wrap items-center gap-2">
             <h3 className="text-base font-semibold text-zinc-900">{label}</h3>
             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">{status}</span>

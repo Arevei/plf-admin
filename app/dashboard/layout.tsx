@@ -55,7 +55,8 @@ function serializeEnquiry(enquiry: EnquiryDoc) {
   };
 }
 
-export default async function DashboardPage() {
+// Loaded once for every /dashboard route so switching sections keeps admin state without refetching.
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   if (!session.isAdmin || !session.adminEmail) {
     redirect("/login");
@@ -268,9 +269,9 @@ export default async function DashboardPage() {
   const initialEnquiries = enquiryRows.map(serializeEnquiry);
 
   return (
-    <main className="min-h-screen bg-zinc-100 px-4 py-8">
-      <div className="mx-auto max-w-7xl">
-        <DashboardPanel
+    <>
+      {children}
+      <DashboardPanel
           email={session.adminEmail}
           initialNews={initialNews}
           initialCampaigns={initialCampaigns}
@@ -283,7 +284,6 @@ export default async function DashboardPage() {
           initialDonationReceipts={initialDonationReceipts}
           initialEnquiries={initialEnquiries}
         />
-      </div>
-    </main>
+    </>
   );
 }

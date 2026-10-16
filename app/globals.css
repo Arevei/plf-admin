@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f9fc;
+  --background: #f2f7f9;
   --foreground: #123653;
   --plf-primary: #0b4a7f;
   --plf-secondary: #067cc1;
@@ -11,8 +11,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-manrope);
-  --font-serif: var(--font-lora);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
   --color-rose-50: #f4f9fc;
   --color-rose-100: #e5f2fa;
   --color-rose-200: #c7e3f4;
@@ -29,13 +29,14 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-manrope), sans-serif;
+  font-family: var(--font-body), Arial, sans-serif;
 }
 
 h1,
 h2,
 h3 {
-  font-family: var(--font-lora), serif;
+  font-family: var(--font-display), Arial, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 .ProseMirror {

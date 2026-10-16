@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import QRCode from "qrcode";
 import type { DonationDoc, MemberDoc, VisitorCertificateDoc } from "@/lib/types";
 import { generateVisitorCertificatePdf, safeFileName } from "@/lib/visitor-certificates";
+import { generateMembershipPaymentReceiptPdf, getReceiptIdentity } from "@/lib/receipt-documents";
 import {
   generateDonationReceiptPdf,
   safeFileName as safeDonationFileName,
@@ -322,16 +323,21 @@ export async function sendMembershipIdCardCertificateEmail(member: MemberDoc, re
 
   const certificatePdf = await generateMembershipCertificatePdf(member, requestUrl);
   const idCardPdf = await generateMembershipIdCardPdf(member, requestUrl);
+  // Include the payment receipt only when a membership fee was actually paid.
+  const receipt = getReceiptIdentity("membership", member);
+  const hasPaidFee = receipt.amount > 0 && (member.payment?.status === "paid" || member.payment?.mode === "manual" || !member.payment?.status);
+  const receiptPdf = hasPaidFee ? generateMembershipPaymentReceiptPdf(member) : null;
   const transporter = getTransporter();
 
   const content = `
       <h2 style="margin-bottom: 8px; color: ${BRAND_PRIMARY};">${ORGANIZATION_NAME}</h2>
       <p style="margin-top: 0; color: #71717a;">Congratulations! Your membership has been approved.</p>
       <p>Dear ${member.name},</p>
-      <p>We are pleased to inform you that your membership has been approved by the foundation. Your membership ID card and certificate are attached with this email.</p>
+      <p>We are pleased to inform you that your membership has been approved by the foundation. Your membership ID card${receiptPdf ? ", certificate and payment receipt are" : " and certificate are"} attached with this email.</p>
       <table style="border-collapse: collapse; margin: 16px 0;">
         <tr><td style="padding: 6px 10px; border: 1px solid #e4e4e7;">Membership ID</td><td style="padding: 6px 10px; border: 1px solid #e4e4e7;">${member.membershipId}</td></tr>
         <tr><td style="padding: 6px 10px; border: 1px solid #e4e4e7;">Certificate No.</td><td style="padding: 6px 10px; border: 1px solid #e4e4e7;">${member.certificateNumber || "Not available"}</td></tr>
+        ${receiptPdf ? `<tr><td style="padding: 6px 10px; border: 1px solid #e4e4e7;">Receipt No.</td><td style="padding: 6px 10px; border: 1px solid #e4e4e7;">${receipt.receiptNumber}</td></tr>` : ""}
       </table>
       <p style="color: #71717a;">Please keep these documents safe for your records.</p>
       <p style="color: #71717a;">Welcome to the ${ORGANIZATION_NAME} family!</p>
@@ -341,7 +347,7 @@ export async function sendMembershipIdCardCertificateEmail(member: MemberDoc, re
     from: `${ORGANIZATION_NAME} <${fromAddress}>`,
     to: member.email,
     replyTo: ADMIN_EMAIL,
-    subject: `Your Membership ID Card and Certificate - ${ORGANIZATION_NAME}`,
+    subject: `Your Membership ID Card${receiptPdf ? ", Certificate and Receipt" : " and Certificate"} - ${ORGANIZATION_NAME}`,
     html: wrapEmailTemplate(content, "Membership Documents", logoUrl),
     attachments: [
       {
@@ -354,6 +360,9 @@ export async function sendMembershipIdCardCertificateEmail(member: MemberDoc, re
         content: Buffer.from(idCardPdf),
         contentType: "application/pdf",
       },
+      ...(receiptPdf
+        ? [{ filename: `${safeMembershipFileName(receipt.receiptNumber)}.pdf`, content: Buffer.from(receiptPdf), contentType: "application/pdf" }]
+        : []),
     ],
   });
 }

@@ -107,7 +107,7 @@ export function LoginPanel() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-rose-500"
-            placeholder="admin@nisvarthjan.org"
+            placeholder="admin@example.org"
           />
         </div>
 

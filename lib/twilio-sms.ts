@@ -47,12 +47,20 @@ export async function sendSms({ to, message }: SendSmsOptions) {
   }
 }
 
+function verifySiteHost() {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://plf.arevei.com").host;
+  } catch {
+    return "plf.arevei.com";
+  }
+}
+
 export function generateDonationReceiptSms(
   donorName: string,
   amount: number,
   receiptNumber: string
 ): string {
-  return `Dear ${donorName}, Thank you for your donation of INR ${amount}. Your 80G receipt number is ${receiptNumber}. Visit nisvarthjan.org to verify. - PLF - Passion for the Least Foundation`;
+  return `Dear ${donorName}, Thank you for your donation of INR ${amount}. Your 80G receipt number is ${receiptNumber}. Verify at ${verifySiteHost()}/verify. - PLF - Passion for the Least Foundation`;
 }
 
 export function generateMembershipReceiptSms(

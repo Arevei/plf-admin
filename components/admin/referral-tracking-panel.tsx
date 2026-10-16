@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { ReferralAchievementTier } from "@/lib/types";
+import { EmptySearchResult, ListToolbar, Pagination, usePagedSearch } from "@/components/admin/list-controls";
 
 export type ReferralAchievementItem = {
   tier: ReferralAchievementTier;
@@ -62,6 +63,7 @@ export function ReferralTrackingPanel({
   const [rows, setRows] = useState(initialRows);
   const [busyMemberId, setBusyMemberId] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const rowList = usePagedSearch(rows, (row) => [row.name, row.email, row.membershipId, row.referralAchievement?.tier, row.referralAchievement?.certificateNumber].join(" "));
 
   const totals = useMemo(
     () => ({
@@ -184,7 +186,10 @@ export function ReferralTrackingPanel({
 
       {error && <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
-      <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+      <ListToolbar state={rowList} label="Search referral members" placeholder="Search by member name, email, membership ID or certificate" />
+
+      <div className="overflow-x-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        <div className="min-w-[900px]">
         <div className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.9fr_1.1fr_1.3fr] bg-zinc-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500">
           <span>Member</span>
           <span>Members</span>
@@ -193,7 +198,7 @@ export function ReferralTrackingPanel({
           <span>Current Certificate</span>
           <span>Admin Allotment</span>
         </div>
-        {rows.map((row) => (
+        {rowList.pageItems.map((row) => (
           <div
             key={row.id}
             className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.9fr_1.1fr_1.3fr] gap-3 border-t border-zinc-200 px-4 py-4 text-sm"
@@ -249,7 +254,13 @@ export function ReferralTrackingPanel({
             </div>
           </div>
         ))}
+        {rows.length === 0 && <p className="border-t border-zinc-200 px-4 py-8 text-center text-sm text-zinc-500">No members with referrals yet.</p>}
+        {rows.length > 0 && rowList.filteredCount === 0 && (
+          <div className="border-t border-zinc-200 p-4"><EmptySearchResult query={rowList.query} onClear={() => rowList.setQuery("")} /></div>
+        )}
+        </div>
       </div>
+      <Pagination state={rowList} />
     </div>
   );
 }
