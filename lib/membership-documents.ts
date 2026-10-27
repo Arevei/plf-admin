@@ -1,7 +1,6 @@
-import { readFileSync } from "fs";
-import path from "path";
 import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
+import { BRAND_LOGO_HEIGHT, BRAND_LOGO_PNG_BASE64, BRAND_LOGO_WIDTH } from "@/lib/brand-logo";
 
 const ORGANIZATION_NAME = "PLF - Passion for the Least Foundation";
 const BRAND_PRIMARY: [number, number, number] = [11, 74, 127];
@@ -144,20 +143,11 @@ function drawDigitalStamp(doc: jsPDF, x: number, y: number, color: [number, numb
   doc.text("SIGNED", x, y + 9.5, { align: "center" });
 }
 
-function getPngDimensions(buffer: Buffer) {
-  return {
-    width: buffer.readUInt32BE(16),
-    height: buffer.readUInt32BE(20),
-  };
-}
-
 function getCertificateLogo() {
-  const logoPath = path.join(process.cwd(), "public", "brand", "footer-logo.png");
-  const logoBuffer = readFileSync(logoPath);
-
   return {
-    dataUrl: `data:image/png;base64,${logoBuffer.toString("base64")}`,
-    ...getPngDimensions(logoBuffer),
+    dataUrl: `data:image/png;base64,${BRAND_LOGO_PNG_BASE64}`,
+    width: BRAND_LOGO_WIDTH,
+    height: BRAND_LOGO_HEIGHT,
   };
 }
 
