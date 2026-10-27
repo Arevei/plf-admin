@@ -67,24 +67,6 @@ function drawInfoRow(doc: jsPDF, label: string, value: string, x: number, y: num
 }
 
 /**
- * Load Hindi font for rendering Devanagari text in PDFs
- * Uses TiroDevanagariHindi-Regular.ttf from public folder
- */
-function getHindiFont() {
-  try {
-    const fontPath = path.join(process.cwd(), "public", "TiroDevanagariHindi-Regular.ttf");
-    const fontBuffer = readFileSync(fontPath);
-    return fontBuffer.toString("base64");
-  } catch (error) {
-    console.warn("Hindi font not found, will use fallback rendering");
-    return null;
-  }
-}
-
-// Hindi verse for the receipt
-const HINDI_VERSE = "रामदूत मैं मात जानकी लेता हूँ शपथ, निस्वार्थ सेवा के लिए करुणानिधान की।";
-
-/**
  * Normalize donation purpose to English (mapping from form selection)
  * Form options are: Education Support, Health Services, Poor & Needy Support,
  * Environment Campaign, Disaster Relief, General Donation
@@ -99,17 +81,6 @@ function normalizeDonationPurpose(value: string): string {
 
 export async function generateDonationReceiptPdf(donation: DonationDoc, requestUrl: string) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-
-  // Load and register Hindi font for Devanagari text rendering
-  const hindiFont = getHindiFont();
-  if (hindiFont) {
-    try {
-      doc.addFileToVFS("TiroDevanagariHindi-Regular.ttf", hindiFont);
-      doc.addFont("TiroDevanagariHindi-Regular.ttf", "TiroDevanagari", "normal");
-    } catch (error) {
-      console.warn("Failed to register Hindi font:", error);
-    }
-  }
 
   const paidAt = donation.payment?.paidAt || donation.createdAt;
   const paymentMode = donation.payment?.mode || "manual";
@@ -144,13 +115,6 @@ export async function generateDonationReceiptPdf(donation: DonationDoc, requestU
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.text("Generated for income tax deduction under Section 80G", 188, 26, { align: "right" });
-
-  if (hindiFont) {
-    doc.setFont("TiroDevanagari", "normal");
-    doc.setFontSize(11);
-    doc.setTextColor(255, 255, 255);
-    doc.text(HINDI_VERSE, 105, 36, { align: "center" });
-  }
 
   doc.setFillColor(244, 249, 252);
   doc.roundedRect(22, 48, 166, 14, 2, 2, "F");
@@ -221,14 +185,6 @@ export async function generateDonationReceiptPdf(donation: DonationDoc, requestU
   doc.text("SCAN TO VERIFY", 167, 218, { align: "center" });
 
   drawDigitalStamp(doc, 126, 204);
-
-  // ============================================
-  // BIG & BEAUTIFUL HINDI VERSE AT VERY END
-  // ============================================
-  if (hindiFont) {
-    // We already added the verse at the top of first page.
-    // No second page needed.
-  }
 
   return doc.output("arraybuffer");
 }

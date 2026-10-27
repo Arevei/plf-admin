@@ -310,16 +310,14 @@ export function DashboardPanel({
     isActive: true,
   });
   const [memberMessageStatus, setMemberMessageStatus] = useState("");
-  const [defaultLanguage, setDefaultLanguage] = useState<"en" | "hi">("hi");
+  const [defaultLanguage, setDefaultLanguage] = useState<"en">("en");
   const [membershipPaymentMode, setMembershipPaymentMode] = useState<"razorpay" | "manual">("razorpay");
   const [donationPaymentMode, setDonationPaymentMode] = useState<"razorpay" | "manual">("razorpay");
   const [siteSettingsStatus, setSiteSettingsStatus] = useState("");
 
   const [newsForm, setNewsForm] = useState({
     title: "",
-    titleHindi: "",
     content: "",
-    contentHindi: "",
     excerpt: "",
     imageUrl: "",
     category: "general",
@@ -328,9 +326,7 @@ export function DashboardPanel({
 
   const [campaignForm, setCampaignForm] = useState({
     title: "",
-    titleHindi: "",
     description: "",
-    descriptionHindi: "",
     goalAmount: "",
     category: "general",
     imageUrl: "",
@@ -342,9 +338,7 @@ export function DashboardPanel({
   const [galleryForm, setGalleryForm] = useState({
     imageUrls: [""],
     caption: "",
-    captionHindi: "",
     detailsEn: "",
-    detailsHi: "",
     category: "events",
   });
 
@@ -502,11 +496,11 @@ export function DashboardPanel({
   const donationList = usePagedSearch(donations, (donation) =>
     [donation.donorName, donation.donorEmail, donation.donorPhone, donation.receiptNumber, donation.purpose, donation.campaignTitle, donation.status, donation.paymentMode, donation.orderId, donation.paymentId, donation.referral?.membershipId].join(" "),
   );
-  const newsList = usePagedSearch(news, (item) => [item.title, item.titleHindi, item.category, item.author].join(" "));
+  const newsList = usePagedSearch(news, (item) => [item.title, item.category, item.author].join(" "));
   const campaignList = usePagedSearch(campaigns, (item) =>
-    [item.title, item.titleHindi, item.category, item.isActive ? "active" : "inactive"].join(" "),
+    [item.title, item.category, item.isActive ? "active" : "inactive"].join(" "),
   );
-  const galleryList = usePagedSearch(gallery, (item) => [item.caption, item.captionHindi, item.category].join(" "), 12);
+  const galleryList = usePagedSearch(gallery, (item) => [item.caption, item.category].join(" "), 12);
   const visitorCertificateList = usePagedSearch(visitorCertificates, (certificate) =>
     [certificate.certificateNumber, certificate.recipientName, certificate.recipientEmail, certificate.recipientPhone, certificate.title, certificate.eventName, certificate.status].join(" "),
   );
@@ -526,9 +520,7 @@ export function DashboardPanel({
       .then(async (response) => {
         if (!response.ok) throw new Error("Failed to load site settings");
         const data = (await response.json()) as { defaultLanguage?: "en" | "hi"; membershipPaymentMode?: "razorpay" | "manual"; donationPaymentMode?: "razorpay" | "manual" };
-        if (data.defaultLanguage === "en" || data.defaultLanguage === "hi") {
-          setDefaultLanguage(data.defaultLanguage);
-        }
+        setDefaultLanguage("en");
         setMembershipPaymentMode(data.membershipPaymentMode === "manual" ? "manual" : "razorpay");
         setDonationPaymentMode(data.donationPaymentMode === "manual" ? "manual" : "razorpay");
       })
@@ -644,9 +636,7 @@ export function DashboardPanel({
   const resetNewsForm = () => {
     setNewsForm({
       title: "",
-      titleHindi: "",
       content: "",
-      contentHindi: "",
       excerpt: "",
       imageUrl: "",
       category: "general",
@@ -766,9 +756,7 @@ export function DashboardPanel({
 
       setCampaignForm({
         title: "",
-        titleHindi: "",
         description: "",
-        descriptionHindi: "",
         goalAmount: "",
         category: "general",
         imageUrl: "",
@@ -787,9 +775,7 @@ export function DashboardPanel({
   const resetCampaignForm = () => {
     setCampaignForm({
       title: "",
-      titleHindi: "",
       description: "",
-      descriptionHindi: "",
       goalAmount: "",
       category: "general",
       imageUrl: "",
@@ -836,8 +822,6 @@ export function DashboardPanel({
     await updateCampaign({
       ...existing,
       ...campaignForm,
-      titleHindi: campaignForm.titleHindi || null,
-      descriptionHindi: campaignForm.descriptionHindi || null,
       imageUrl: campaignForm.imageUrl || null,
       goalAmount: Number(campaignForm.goalAmount),
       startDate: campaignForm.startDate || null,
@@ -925,9 +909,7 @@ export function DashboardPanel({
     setGalleryForm({
       imageUrls: [""],
       caption: "",
-      captionHindi: "",
       detailsEn: "",
-      detailsHi: "",
       category: "events",
     });
     setEditingGalleryId(null);
@@ -2024,10 +2006,6 @@ export function DashboardPanel({
                 <input ref={newsTitleInputRef} value={newsForm.title} onChange={(e) => setNewsForm((p) => ({ ...p, title: e.target.value }))} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm" />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-zinc-700">Title (Hindi)</label>
-                <input value={newsForm.titleHindi} onChange={(e) => setNewsForm((p) => ({ ...p, titleHindi: e.target.value }))} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm" />
-              </div>
-              <div>
                 <label className="mb-1 block text-sm font-medium text-zinc-700">Category</label>
                 <select value={newsForm.category} onChange={(e) => setNewsForm((p) => ({ ...p, category: e.target.value }))} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm">
                   {newsCategories.map((category) => (
@@ -2053,10 +2031,6 @@ export function DashboardPanel({
             <div className="mt-4">
               <label className="mb-1 block text-sm font-medium text-zinc-700">Content (English)</label>
               <RichTextEditor value={newsForm.content} onChange={(content) => setNewsForm((p) => ({ ...p, content }))} placeholder="Write english content..." />
-            </div>
-            <div className="mt-4">
-              <label className="mb-1 block text-sm font-medium text-zinc-700">Content (Hindi)</label>
-              <RichTextEditor value={newsForm.contentHindi} onChange={(contentHindi) => setNewsForm((p) => ({ ...p, contentHindi }))} placeholder="Write hindi content..." />
             </div>
 
             <button type="button" onClick={editingNewsId ? updateNews : submitNews} disabled={busy} className="mt-4 rounded-md bg-rose-700 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-800 disabled:opacity-60">
@@ -2084,9 +2058,7 @@ export function DashboardPanel({
                         setEditingNewsId(item.id);
                         setNewsForm({
                           title: item.title,
-                          titleHindi: item.titleHindi || "",
                           content: item.content,
-                          contentHindi: item.contentHindi || "",
                           excerpt: item.excerpt || "",
                           imageUrl: item.imageUrl || "",
                           category: item.category,
@@ -2151,10 +2123,6 @@ export function DashboardPanel({
                 <input ref={campaignTitleInputRef} value={campaignForm.title} onChange={(e) => setCampaignForm((p) => ({ ...p, title: e.target.value }))} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm" />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-zinc-700">Title (Hindi)</label>
-                <input value={campaignForm.titleHindi} onChange={(e) => setCampaignForm((p) => ({ ...p, titleHindi: e.target.value }))} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm" />
-              </div>
-              <div>
                 <label className="mb-1 block text-sm font-medium text-zinc-700">Category</label>
                 <select value={campaignForm.category} onChange={(e) => setCampaignForm((p) => ({ ...p, category: e.target.value }))} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm">
                   {campaignCategories.map((category) => (
@@ -2183,10 +2151,6 @@ export function DashboardPanel({
             <div className="mt-4">
               <label className="mb-1 block text-sm font-medium text-zinc-700">Description (English)</label>
               <RichTextEditor value={campaignForm.description} onChange={(description) => setCampaignForm((p) => ({ ...p, description }))} placeholder="Write campaign description..." />
-            </div>
-            <div className="mt-4">
-              <label className="mb-1 block text-sm font-medium text-zinc-700">Description (Hindi)</label>
-              <RichTextEditor value={campaignForm.descriptionHindi} onChange={(descriptionHindi) => setCampaignForm((p) => ({ ...p, descriptionHindi }))} placeholder="Write hindi description..." />
             </div>
 
             <div className="mt-4 flex items-center gap-2">
@@ -2222,9 +2186,7 @@ export function DashboardPanel({
                         setEditingCampaignId(item.id);
                         setCampaignForm({
                           title: item.title,
-                          titleHindi: item.titleHindi || "",
                           description: item.description,
-                          descriptionHindi: item.descriptionHindi || "",
                           goalAmount: String(item.goalAmount),
                           category: item.category,
                           imageUrl: item.imageUrl || "",
@@ -2425,10 +2387,6 @@ export function DashboardPanel({
                 <input value={galleryForm.caption} onChange={(e) => setGalleryForm((p) => ({ ...p, caption: e.target.value }))} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm" />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-zinc-700">Caption (Hindi)</label>
-                <input value={galleryForm.captionHindi} onChange={(e) => setGalleryForm((p) => ({ ...p, captionHindi: e.target.value }))} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm" />
-              </div>
-              <div>
                 <label className="mb-1 block text-sm font-medium text-zinc-700">Category</label>
                 <select value={galleryForm.category} onChange={(e) => setGalleryForm((p) => ({ ...p, category: e.target.value }))} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm">
                   {galleryCategories.map((category) => (
@@ -2442,10 +2400,6 @@ export function DashboardPanel({
               <div>
                 <label className="mb-1 block text-sm font-medium text-zinc-700">Details (English)</label>
                 <RichTextEditor value={galleryForm.detailsEn} onChange={(detailsEn) => setGalleryForm((p) => ({ ...p, detailsEn }))} placeholder="Write activity details..." />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-zinc-700">Details (Hindi)</label>
-                <RichTextEditor value={galleryForm.detailsHi} onChange={(detailsHi) => setGalleryForm((p) => ({ ...p, detailsHi }))} placeholder="Write activity details in Hindi..." />
               </div>
             </div>
 
@@ -2497,7 +2451,6 @@ export function DashboardPanel({
                         {itemImages.length > 1 && <span className="text-xs text-zinc-500">{itemImages.length} media</span>}
                       </div>
                       <h3 className="text-base font-semibold text-zinc-900">{item.caption || "Untitled activity post"}</h3>
-                      {item.captionHindi && <p className="mt-1 text-sm text-zinc-500">{item.captionHindi}</p>}
                       {item.detailsEn && <p className="mt-2 line-clamp-2 text-sm text-zinc-600">{stripHtml(item.detailsEn)}</p>}
                       <div className="mt-4 flex flex-wrap gap-2">
                         <button
@@ -2508,9 +2461,7 @@ export function DashboardPanel({
                             setGalleryForm({
                               imageUrls,
                               caption: item.caption || "",
-                              captionHindi: item.captionHindi || "",
                               detailsEn: item.detailsEn || "",
-                              detailsHi: item.detailsHi || "",
                               category: item.category,
                             });
                           }}
@@ -2682,24 +2633,9 @@ export function DashboardPanel({
       {tab === "siteSettings" && (
         <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
           <h3 className="text-lg font-bold text-zinc-950">Website and Payment Settings</h3>
-          <p className="mt-2 max-w-2xl text-sm text-zinc-600">
-            Choose the default language for new visitors. Returning visitors who already picked a language in the navbar keep their saved choice.
-          </p>
+          <p className="mt-2 max-w-2xl text-sm text-zinc-600">The public website is displayed in English.</p>
 
           <div className="mt-6 max-w-md space-y-4">
-            <label className="block text-sm font-semibold text-zinc-700" htmlFor="default-language">
-              Default language
-            </label>
-            <select
-              id="default-language"
-              value={defaultLanguage}
-              onChange={(event) => setDefaultLanguage(event.target.value as "en" | "hi")}
-              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900"
-            >
-              <option value="hi">Hindi</option>
-              <option value="en">English</option>
-            </select>
-
             <label className="block text-sm font-semibold text-zinc-700" htmlFor="membership-payment-mode">Membership payment mode</label>
             <select id="membership-payment-mode" value={membershipPaymentMode} onChange={(event) => setMembershipPaymentMode(event.target.value as "razorpay" | "manual")} className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900">
               <option value="razorpay">Razorpay</option>
