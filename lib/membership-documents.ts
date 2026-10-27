@@ -241,6 +241,10 @@ export async function generateMembershipCertificatePdf(member: MemberDocumentRec
   addValueText(doc, safeText(member.phone), 207, 135, 58);
   addValueText(doc, location, 207, 146, 58);
 
+  doc.setFontSize(7);
+  doc.setTextColor(89, 78, 73);
+  doc.text("For assistance: plf@plf-india.org | 0120-4902645", 34, 187);
+
   drawDigitalStamp(doc, 234, 176);
 
   return doc.output("arraybuffer");

@@ -237,6 +237,10 @@ export async function generateReferralAchievementCertificatePdf(
   doc.setFontSize(9);
   doc.setTextColor(r, g, b);
   doc.text("Recipient Signature", 63, 186, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(89, 78, 73);
+  doc.text("For assistance: plf@plf-india.org | 0120-4902645", 34, 190);
   drawDigitalStamp(doc, 234, 178, [r, g, b]);
 
   return doc.output("arraybuffer");

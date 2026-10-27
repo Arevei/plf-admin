@@ -149,6 +149,8 @@ export async function generateVisitorCertificatePdf(certificate: VisitorCertific
   doc.setFontSize(9);
   doc.setTextColor(75, 75, 75);
   doc.text(certificate.issuedBy || "PLF - Passion for the Least Foundation", 148.5, 168, { align: "center", maxWidth: 90 });
+  doc.setFontSize(7);
+  doc.text("For assistance: plf@plf-india.org | 0120-4902645", 34, 188);
 
   drawDigitalStamp(doc, 148.5, 184, template.primary);
 
